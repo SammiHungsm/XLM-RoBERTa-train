@@ -2,11 +2,10 @@ import os
 import re
 import json
 import requests
-from dotenv import load_dotenv
+
 from transformers import pipeline
 
-# 載入 .env 檔案中的環境變數
-load_dotenv()
+
 
 # ==========================================
 # 1. PII 脫敏核心類 (HK_PII_Tokenizer_Ultimate)

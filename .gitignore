@@ -1,3 +1,6 @@
 .env
 .venv
-train/geojson_files/*
+*geojson_files
+*Chinese-Names-Corpus-master
+train_data_lora.json
+lora_xlm_roberta_ner
