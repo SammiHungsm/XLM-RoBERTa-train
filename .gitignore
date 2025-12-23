@@ -7,3 +7,5 @@ lora_xlm_roberta_ner
 final_lora_model*
 uv.lock
 ./my_merged_pretrained_model/*
+my_merged_presidio_model
+final_lora_model
