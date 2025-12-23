@@ -4,3 +4,6 @@
 *Chinese-Names-Corpus-master
 train_data_lora.json
 lora_xlm_roberta_ner
+final_lora_model*
+uv.lock
+my_merged_pretrained_model*
