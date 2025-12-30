@@ -175,7 +175,8 @@ test_inputs = [
     "你好，我係 Sammi。我住係 Tuen Mun 屯門市廣場 10 樓。",
     "我的電話係 9123 4567。身分證 A123456(7)。",
     "Sammi 之前打過黎。",
-    "Edmond梁，身高185cm，居住於香港觀塘 AIA Tower 31樓，Bank Account = 274542182882現任Alibaba CEO，電話為 21678080，身份證號為 R98272829。"
+    "Edmond梁，身高185cm，居住於香港觀塘 AIA Tower 31樓，Bank Account = 274542182882現任Alibaba CEO，電話為 21678080，身份證號為 R98272829。",
+    "Hey, my name is Alex Chan. I just moved to 12A Nathan Road in Kowloon last week. If you need to reach me, my phone number is 91234567. By the way, my Hong Kong ID is R123456(7), and my bank account number is 1234567890. I’m working at TechCorp Limited now, so most emails will come from that domain. Oh, and my car license plate is AB1234, registered under TechCorp Limited. Let me know if you need any more details."
 ]
 
 print("=" * 60)
