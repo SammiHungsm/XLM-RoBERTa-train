@@ -1,3 +1,5 @@
+import json
+import os
 from transformers import AutoTokenizer, AutoModelForTokenClassification, pipeline
 from peft import PeftModel
 import re
@@ -51,104 +53,120 @@ def analyze_text_composition(text):
     return f"Chinese: {chi_chars/total*100:.1f}% | English: {eng_chars/total*100:.1f}%"
 
 def clean_and_process_entities(results, text):
-    """
-    包含了：
-    1. 黑名單 (Blacklist) -> 過濾 '健在', '不詳'
-    2. 高級擴展 (Advanced Expansion) -> 抓取 '(', ')', '-'
-    3. 單字過濾 (Single Char Filter) -> 過濾語氣詞 '黎'
-    """
-    cleaned = []
-    skip_next = False
+    merged_entities = []
     
-    # 🔥 1. 黑名單：強制忽略這些常見誤判
-    blacklist = ["健在", "不詳", "未知", "無業", "離異", "單身", "不便", "整合", "處理", "錯誤"]
-
-    for i in range(len(results)):
-        if skip_next:
-            skip_next = False
-            continue
-            
-        curr = results[i]
-        if curr['end'] > len(text): curr['end'] = len(text)
+    # --- 階段一：初步過濾與合併 ---
+    current_entity = None
+    for res in results:
+        if res['score'] < 0.60: continue
+        entity_group = res['entity_group']
+        word = text[res['start']:res['end']]
         
-        # --- 🔥 2. 增強版擴展 (Advanced Expansion) ---
-        # 這裡不只檢查 isdigit()，還檢查符號，解決 ID 括號被切斷的問題
-        numeric_labels = ['PHONE', 'ID', 'ACCOUNT', 'HKID', 'LICENSE_PLATE']
-        if curr['entity_group'] in numeric_labels:
-            # 向左擴展：允許數字、括號、加號、空格
-            while curr['start'] > 0 and text[curr['start'] - 1] in "0123456789()+- ":
-                curr['start'] -= 1
-            # 向右擴展：允許數字、括號、字母(ID後綴)
-            while curr['end'] < len(text) and text[curr['end']] in "0123456789()ABCDEFGHIJKLMNOPQRSTUVWXYZ":
-                curr['end'] += 1
-            
-            # 更新內容
-            curr['word'] = text[curr['start']:curr['end']]
-        # ---------------------------------------
+        if current_entity and res['start'] == current_entity['end'] and current_entity['entity_group'] == entity_group:
+            current_entity['word'] += word
+            current_entity['end'] = res['end']
+            current_entity['score_sum'] += res['score']
+            current_entity['token_count'] += 1
+        else:
+            if current_entity:
+                current_entity['score'] = current_entity['score_sum'] / current_entity['token_count']
+                merged_entities.append(current_entity)
+            current_entity = {
+                "entity_group": entity_group, "word": word, "start": res['start'],
+                "end": res['end'], "score": res['score'], "score_sum": res['score'], "token_count": 1
+            }
+    if current_entity:
+        current_entity['score'] = current_entity['score_sum'] / current_entity['token_count']
+        merged_entities.append(current_entity)
 
-        word = text[curr['start']:curr['end']].strip()
+    # --- 階段二：後處理清洗 (Advanced Cleaning) ---
+    final_cleaned = []
+    blacklist_words = ["健在", "不詳", "未知", "無業", "離異", "單身", "不便", "整合", "處理", "錯誤", "高度", "闊度"]
+    cantonese_noise = ["黎", "係", "打", "之前", "主席", "職", "長和", "仲要"] 
+
+    for ent in merged_entities:
+        word = ent['word'].strip()
+        label = ent['entity_group']
+        start = ent['start']
+        end = ent['end']
         
-        # 3. 應用黑名單 (解決 "健在" 問題)
-        if word in blacklist:
-            continue
+        # 1. 基礎過濾
+        if word in blacklist_words or word in cantonese_noise: continue
+        if re.match(r'^[\W_]+$', word): continue
 
-        # 4. 單字人名過濾 (解決 "黎" 問題)
-        # 如果是 NAME 且長度為 1 (且不是英文)，通常是誤判 (如語氣詞)
-        if curr['entity_group'] == 'NAME' and len(word) == 1 and not re.match(r'[a-zA-Z]', word):
-            if curr['score'] < 0.995: # 除非信心極高，否則過濾
-                continue
+        # 2. [規則 A: URL/Path 過濾]
+        if '%' in word or 'http' in word or 'www' in word or '.com' in word or '/' in word: continue
 
-        # 5. 過濾純標點
-        if re.match(r'^[\W_]+$', word):
-            continue
+        # 3. [規則 B: 量詞過濾]
+        if label in ['ID', 'ACCOUNT', 'PHONE', 'LICENSE_PLATE']:
+            if re.search(r'\d+(cm|kg|km|m|g|ml|L|Hz|GB|MB|KB|ft|in)$', word, re.IGNORECASE): continue
 
-        # 6. 合併 Phone + ID
-        if i < len(results) - 1:
-            next_e = results[i+1]
-            gap_text = text[curr['end']:next_e['start']]
-            
-            # 如果中間只有空格或 dash
-            if re.match(r'^[\s-]*$', gap_text): 
-                # 規則 A: PHONE + ID -> PHONE
-                if curr['entity_group'] == 'PHONE' and next_e['entity_group'] == 'ID':
-                    new_entity = curr.copy()
-                    new_entity['end'] = next_e['end']
-                    new_entity['word'] = text[curr['start']:next_e['end']]
-                    new_entity['score'] = (curr['score'] + next_e['score']) / 2
-                    cleaned.append(new_entity)
-                    skip_next = True
-                    continue
-                
-                # 規則 B: 同類合併 (斷開的帳號)
-                if curr['entity_group'] == next_e['entity_group']:
-                    new_entity = curr.copy()
-                    new_entity['end'] = next_e['end']
-                    new_entity['word'] = text[curr['start']:next_e['end']]
-                    new_entity['score'] = (curr['score'] + next_e['score']) / 2
-                    cleaned.append(new_entity)
-                    skip_next = True
-                    continue
+        # 4. [規則 C: Account/Phone 嚴格清洗]
+        if label in ['ACCOUNT', 'PHONE']:
+            cleaned_word = re.sub(r'[^\d\+\-\(\)\s]', '', word).strip()
+            if len(cleaned_word) < 3: continue
+            ent['word'] = cleaned_word
 
-        cleaned.append(curr)
+        # 5. [規則 D: ID/車牌 清洗]
+        if label in ['ID', 'LICENSE_PLATE']:
+            cleaned_word = re.sub(r'[\u4e00-\u9fff]+', '', word).strip()
+            if len(cleaned_word) < 2: continue
+            ent['word'] = cleaned_word
 
-    # --- 編號邏輯 ---
-    cleaned.sort(key=lambda x: x['start'])
+        # 6. [規則 E: 車牌向左擴展]
+        if label == 'LICENSE_PLATE' and re.match(r'^\d+$', ent['word']):
+            pre_start = start - 3 if start >=3 else 0
+            prefix_text = text[pre_start:start]
+            prefix_match = re.search(r'([A-Z]{1,2})\s?$', prefix_text)
+            if prefix_match:
+                prefix = prefix_match.group(1)
+                ent['start'] = start - len(prefix_match.group(0))
+                ent['word'] = prefix + ent['word']
+
+        # 7. [規則 F: 人名長度與混合語言]
+        if label == 'NAME':
+            has_chinese = bool(re.search(r'[\u4e00-\u9fff]', word))
+            has_english = bool(re.search(r'[a-zA-Z]', word))
+            if has_chinese:
+                if not has_english and len(word) > 5: continue
+                if has_english and len(word) > 12: continue
+                if len(word) == 1 and ent['score'] < 0.995: continue
+            else:
+                if len(word) > 25: continue
+                if len(word) < 2: continue
+
+        # 8. [規則 G: ID 括號修復]
+        if label == 'ID' and end < len(text) and text[end] == ')':
+             ent['end'] += 1
+             ent['word'] += ')'
+
+        # 9. [規則 H: 英文名字向右補全]
+        if label == 'NAME':
+            if re.search(r'[a-zA-Z]$', ent['word']):
+                remaining_text = text[ent['end']:]
+                suffix_match = re.match(r'^([a-z]+)', remaining_text)
+                if suffix_match:
+                    suffix = suffix_match.group(1)
+                    ent['end'] += len(suffix)
+                    ent['word'] += suffix
+
+        final_cleaned.append(ent)
+
+    # --- 階段三：編號與輸出格式化 ---
     final_output = []
     counters = defaultdict(int)
     entity_registry = {} 
-    
-    for entity in cleaned:
+    final_cleaned.sort(key=lambda x: x['start'])
+
+    for entity in final_cleaned:
         label = entity['entity_group']
-        word_content = text[entity['start']:entity['end']].strip()
-        dict_key = (label, word_content)
-        
+        dict_key = (label, entity['word'])
         if dict_key in entity_registry:
             seq_num = entity_registry[dict_key]
         else:
             counters[label] += 1
             seq_num = counters[label]
             entity_registry[dict_key] = seq_num
-        
         entity['numbered_tag'] = f"{label}-{seq_num}"
         final_output.append(entity)
         
@@ -163,21 +181,26 @@ def mask_text(text, entities):
     return masked_text
 
 # ==========================================
-# 3. Test Inputs
+# 3. Load Test Data
 # ==========================================
-test_inputs = [
-    "李嘉誠好有錢，仲要住係香港中環皇后大道中 33 號萬宜大廈 12 樓，年齡 82 歲。其出生地未有記錄，父母不健在，目前從事兼職工作。聯絡電話為 +852 9123 4567。曾任職於長和主席。",
-    "Li Ka-shing is widely recognized as one of the wealthiest individuals in Hong Kong, with a reputation that extends far beyond the city itself. He currently resides at 12/F, Man Yee Building, 33 Queen’s Road Central. At the age of 82.",
-    "Li Ka-shing is very wealthy and resides at 12/F, Man Yee Building, 33 Queen’s Road Central, Hong Kong. His contact number is +852 9123 4567. He previously served as Chairman of Cheung Kong Holdings.",
-    "已知李嘉誠居住於 Hong Kong Kwun Tong 99 號 AIA Tower 8/F，他今年 31 歲，電話號碼為 +852 9167 8920，曾經擔任過 Deliveroo 外賣員一職，我想知同佢有關嘅人嘅資料",
-    "已知 A 君現居於香港觀塘道 99 號 AIA Tower 八樓，年齡 31 歲。聯絡電話為 +852 9167 8920。過往曾任職 Deliveroo 外賣員，具備相關工作經驗。請為我搜尋相關資料",
-    "我叫李嘉誠，我嘅身份證號碼係 R1234567(A)，我係12月1號下午嘗試申請強積金整合，但未能成功，並顯示古怪錯誤，請盡快處理。",
-    "你好，我係 Sammi。我住係 Tuen Mun 屯門市廣場 10 樓。",
-    "我的電話係 9123 4567。身分證 A123456(7)。",
-    "Sammi 之前打過黎。",
-    "Edmond梁，身高185cm，居住於香港觀塘 AIA Tower 31樓，Bank Account = 274542182882現任Alibaba CEO，電話為 21678080，身份證號為 R98272829。",
-    "Hey, my name is Alex Chan. I just moved to 12A Nathan Road in Kowloon last week. If you need to reach me, my phone number is 91234567. By the way, my Hong Kong ID is R123456(7), and my bank account number is 1234567890. I’m working at TechCorp Limited now, so most emails will come from that domain. Oh, and my car license plate is AB1234, registered under TechCorp Limited. Let me know if you need any more details."
-]
+def load_test_inputs(filepath="train/test_data.json"):
+    if os.path.exists(filepath):
+        try:
+            with open(filepath, 'r', encoding='utf-8') as f:
+                print(f"📂 Loaded test data from {filepath}")
+                return json.load(f)
+        except Exception as e:
+            print(f"⚠️ Error loading JSON: {e}")
+    
+    # Fallback default if file not found
+    print("⚠️ test_data.json not found, using default sample.")
+    return ["你好，我係 Sammi。我的電話係 9123 4567。"]
+
+# ==========================================
+# 4. Execution
+# ==========================================
+# 嘗試讀取 train/test_data.json，如果你的路徑不同請修改這裡
+test_inputs = load_test_inputs("train/test_data.json")
 
 print("=" * 60)
 for text in test_inputs:
@@ -192,5 +215,5 @@ for text in test_inputs:
     print(f"Masked Result: {masked_result}")
     print("Detected Entities:")
     for e in processed_entities:
-        print(f" - {text[e['start']:e['end']]} | {e['numbered_tag']} ({e['score']:.1%})")
+        print(f" - {e['word']} | {e['numbered_tag']} ({e['score']:.1%})")
     print("=" * 60)
