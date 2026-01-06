@@ -11,7 +11,7 @@ from collections import defaultdict
 base_model_name = "Davlan/xlm-roberta-large-ner-hrl"
 lora_model_path = "./final_lora_model" 
 
-# 必須與 prepare_data.py 一致 (15 個標籤)
+# Must match prepare_data.py (15 labels)
 label_list = [
     "O", 
     "B-NAME", "I-NAME", 
@@ -36,7 +36,7 @@ try:
     model.eval()
 except Exception as e:
     print(f"Model loading failed: {e}")
-    print("提示：如果報錯 Size Mismatch，請確認你是否已經刪除舊的 output 資料夾並重新訓練。")
+    print("Hint: If Size Mismatch error, check if you deleted the old output folder before retraining.")
     exit()
 
 nlp = pipeline("token-classification", model=model, tokenizer=tokenizer, aggregation_strategy="simple", device=0)
@@ -55,10 +55,12 @@ def analyze_text_composition(text):
 def clean_and_process_entities(results, text):
     merged_entities = []
     
-    # --- 階段一：初步過濾與合併 ---
+    # --- Phase 1: Initial Filter & Merge ---
     current_entity = None
     for res in results:
+        # [Rule 1] Confidence Threshold
         if res['score'] < 0.60: continue
+        
         entity_group = res['entity_group']
         word = text[res['start']:res['end']]
         
@@ -79,41 +81,46 @@ def clean_and_process_entities(results, text):
         current_entity['score'] = current_entity['score_sum'] / current_entity['token_count']
         merged_entities.append(current_entity)
 
-    # --- 階段二：後處理清洗 (Advanced Cleaning) ---
+    # --- Phase 2: Advanced Cleaning Rules ---
     final_cleaned = []
     blacklist_words = ["健在", "不詳", "未知", "無業", "離異", "單身", "不便", "整合", "處理", "錯誤", "高度", "闊度"]
     cantonese_noise = ["黎", "係", "打", "之前", "主席", "職", "長和", "仲要"] 
 
     for ent in merged_entities:
-        word = ent['word'].strip()
+        # [Pre-clean]: Strip punctuation like quote marks (Fixes "「慈悲")
+        word = ent['word'].strip().strip("「」『』《》()（）")
+        # Update word in entity object immediately
+        ent['word'] = word 
+        
         label = ent['entity_group']
         start = ent['start']
         end = ent['end']
         
-        # 1. 基礎過濾
+        # 1. Basic Filters
+        if not word: continue
         if word in blacklist_words or word in cantonese_noise: continue
         if re.match(r'^[\W_]+$', word): continue
 
-        # 2. [規則 A: URL/Path 過濾]
+        # 2. [Rule A: URL/Path Filter]
         if '%' in word or 'http' in word or 'www' in word or '.com' in word or '/' in word: continue
 
-        # 3. [規則 B: 量詞過濾]
+        # 3. [Rule B: Measurement Filter]
         if label in ['ID', 'ACCOUNT', 'PHONE', 'LICENSE_PLATE']:
             if re.search(r'\d+(cm|kg|km|m|g|ml|L|Hz|GB|MB|KB|ft|in)$', word, re.IGNORECASE): continue
 
-        # 4. [規則 C: Account/Phone 嚴格清洗]
+        # 4. [Rule C: Account/Phone Strict Clean]
         if label in ['ACCOUNT', 'PHONE']:
             cleaned_word = re.sub(r'[^\d\+\-\(\)\s]', '', word).strip()
             if len(cleaned_word) < 3: continue
             ent['word'] = cleaned_word
 
-        # 5. [規則 D: ID/車牌 清洗]
+        # 5. [Rule D: ID/Plate Clean Chinese]
         if label in ['ID', 'LICENSE_PLATE']:
             cleaned_word = re.sub(r'[\u4e00-\u9fff]+', '', word).strip()
             if len(cleaned_word) < 2: continue
             ent['word'] = cleaned_word
 
-        # 6. [規則 E: 車牌向左擴展]
+        # 6. [Rule E: License Plate Left-Extension] (Fixes "1234" missing "AB")
         if label == 'LICENSE_PLATE' and re.match(r'^\d+$', ent['word']):
             pre_start = start - 3 if start >=3 else 0
             prefix_text = text[pre_start:start]
@@ -123,24 +130,39 @@ def clean_and_process_entities(results, text):
                 ent['start'] = start - len(prefix_match.group(0))
                 ent['word'] = prefix + ent['word']
 
-        # 7. [規則 F: 人名長度與混合語言]
+        # 7. [Rule F: Smart Name Length & Logic] (Fixes "Edmond梁" & "華特．艾薩克森")
         if label == 'NAME':
             has_chinese = bool(re.search(r'[\u4e00-\u9fff]', word))
             has_english = bool(re.search(r'[a-zA-Z]', word))
+            # Check for transliteration dots (e.g., in "Walter.Isaacson")
+            has_separator = bool(re.search(r'[·．]', word))
+
             if has_chinese:
-                if not has_english and len(word) > 5: continue
+                # Case 1: Mixed Chinese & English (e.g., Edmond梁) -> Allow up to 12
                 if has_english and len(word) > 12: continue
+                
+                # Case 2: Pure Chinese
+                if not has_english:
+                    # If it has a separator (Transliterated name), allow longer (up to 15)
+                    if has_separator:
+                        if len(word) > 15: continue 
+                    # Standard Chinese name, strict limit (5)
+                    elif len(word) > 5: 
+                        continue
+                
+                # Filter single char Chinese names (unless super confident)
                 if len(word) == 1 and ent['score'] < 0.995: continue
             else:
+                # Pure English
                 if len(word) > 25: continue
                 if len(word) < 2: continue
 
-        # 8. [規則 G: ID 括號修復]
+        # 8. [Rule G: ID Bracket Fix]
         if label == 'ID' and end < len(text) and text[end] == ')':
              ent['end'] += 1
              ent['word'] += ')'
 
-        # 9. [規則 H: 英文名字向右補全]
+        # 9. [Rule H: English Name Right-Completion] (Fixes "Sam" missing "mi")
         if label == 'NAME':
             if re.search(r'[a-zA-Z]$', ent['word']):
                 remaining_text = text[ent['end']:]
@@ -152,7 +174,7 @@ def clean_and_process_entities(results, text):
 
         final_cleaned.append(ent)
 
-    # --- 階段三：編號與輸出格式化 ---
+    # --- Phase 3: Numbering & Formatting ---
     final_output = []
     counters = defaultdict(int)
     entity_registry = {} 
@@ -174,6 +196,7 @@ def clean_and_process_entities(results, text):
 
 def mask_text(text, entities):
     masked_text = text
+    # Replace in reverse order to preserve indices
     for entity in sorted(entities, key=lambda x: x['start'], reverse=True):
         start, end = entity['start'], entity['end']
         tag = f"[{entity['numbered_tag']}]"
@@ -192,14 +215,14 @@ def load_test_inputs(filepath="train/test_data.json"):
         except Exception as e:
             print(f"⚠️ Error loading JSON: {e}")
     
-    # Fallback default if file not found
+    # Fallback default
     print("⚠️ test_data.json not found, using default sample.")
     return ["你好，我係 Sammi。我的電話係 9123 4567。"]
 
 # ==========================================
 # 4. Execution
 # ==========================================
-# 嘗試讀取 train/test_data.json，如果你的路徑不同請修改這裡
+# Load test data
 test_inputs = load_test_inputs("train/test_data.json")
 
 print("=" * 60)
