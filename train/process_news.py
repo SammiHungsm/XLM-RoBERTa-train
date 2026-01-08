@@ -1,18 +1,28 @@
 import json
 import re
+# ✅ 引入共用的 tokenizer
+from data_utils.tokenizer import smart_tokenize 
 
 # ==========================================
-# 1. 定義要標註的「機構名單」 (Target ORGs)
+# 1. 定義要標註的清單
 # ==========================================
-# 這些會被標記為 B-ORG / I-ORG
-# 其他所有數字、年份、高鐵名都會自動變 O，有效消除幻覺
+
+# A. 機構 (ORG)
 target_orgs = [
     "中國國家鐵路集團有限公司",
     "國鐵集團"
 ]
 
+# B. 地名/地址 (ADDRESS) - ✅ 新增這個！
+# 根據你的新聞內容，我提取了出現過的地點
+target_addrs = [
+    "大嶼山", "屯門", "北都", 
+    "長贛", "瀋白", # 雖然是高鐵線名，但通常包含地名，視乎你想不想標
+    "香港", "中國"
+]
+
 # ==========================================
-# 2. 原始文本
+# 2. 原始文本 (不變)
 # ==========================================
 raw_content = """據中國國家鐵路集團有限公司今（4日）披露，鐵路「十四五」實現圓滿收官。「十四五」期間，全國鐵路營業里程由14.63萬公里增至16.5萬公里、增長12.8%，高鐵由3.79萬公里增至5.04萬公里、增長32.98%，中國建成世界規模最大、先進發達的高速鐵路網。
 
@@ -28,8 +38,7 @@ raw_content = """據中國國家鐵路集團有限公司今（4日）披露，�
 # 3. 處理邏輯
 # ==========================================
 def process_news(text):
-    # A. 簡單清洗 (移除 URL，因為 URL 結構太複雜容易干擾 ORG 學習，除非你想捉 URL 裡面的 ORG)
-    # 這裡我們選擇移除 "原文網址：" 之後的部分，讓模型專注於內文
+    # A. 簡單清洗
     if "原文網址：" in text:
         text = text.split("原文網址：")[0]
 
@@ -59,16 +68,45 @@ def process_news(text):
     final_data = []
 
     for sent in segments:
-        tokens = list(sent)
+        tokens = smart_tokenize(sent)
         tags = [label2id["O"]] * len(tokens)
         
-        # 標註 ORG
-        for org in target_orgs:
-            for match in re.finditer(org, sent):
-                start, end = match.span()
-                tags[start] = label2id["B-ORG"]
-                for i in range(start + 1, end):
-                    tags[i] = label2id["I-ORG"]
+        # 建立 Alignment 映射
+        token_spans = []
+        search_start = 0
+        for token in tokens:
+            start = sent.find(token, search_start)
+            if start == -1:
+                token_spans.append(None)
+                continue
+            end = start + len(token)
+            token_spans.append((start, end))
+            search_start = end
+
+        # 定義標註函數
+        def apply_labels(targets, label_b, label_i):
+            for target in targets:
+                for match in re.finditer(re.escape(target), sent):
+                    match_start, match_end = match.span()
+                    
+                    for idx, span in enumerate(token_spans):
+                        if span is None: continue
+                        t_start, t_end = span
+                        
+                        if t_start >= match_start and t_end <= match_end:
+                            if t_start == match_start:
+                                if tags[idx] == label2id["O"]:
+                                    tags[idx] = label2id[label_b]
+                            else:
+                                if tags[idx] == label2id["O"]:
+                                    tags[idx] = label2id[label_i]
+
+        # 執行標註
+        # 1. 標註機構
+        apply_labels(target_orgs, "B-ORG", "I-ORG")
+        
+        # 2. 標註地名 ✅ (新增這行)
+        apply_labels(target_addrs, "B-ADDRESS", "I-ADDRESS")
         
         if len(tokens) > 0:
             final_data.append({
@@ -89,5 +127,5 @@ with open(output_file, "w", encoding="utf-8") as f:
 
 print(f"✅ 處理完成！共生成 {len(news_json_data)} 條新聞數據。")
 print(f"   - 已標註 ORG: {target_orgs}")
-print(f"   - 其他數字、年份已自動設為 O (負樣本)")
+print(f"   - 已標註 ADDRESS: {target_addrs}") # 顯示已標註的地名
 print(f"📁 檔案已儲存為: {output_file}")

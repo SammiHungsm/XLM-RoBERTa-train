@@ -2,6 +2,7 @@ import random
 import json
 import re
 from faker import Faker
+from data_utils.tokenizer import smart_tokenize
 
 # 引入自定義模組
 # 注意：你需要確保 train/data_utils/__init__.py 存在

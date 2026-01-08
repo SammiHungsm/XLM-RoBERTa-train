@@ -1,15 +1,13 @@
 import json
 import re
+# ✅ 引入共用的 tokenizer
+from data_utils.tokenizer import smart_tokenize 
 
 # ==========================================
 # 1. 定義要標註的「實體名單」
 # ==========================================
-# 這些是我們希望模型學會捉住的重點
 target_names = ["楊美珍", "金澤培"]
 target_orgs = ["港鐵"]
-
-# 注意：「行政總裁」、「常務總監」、「員工」等職位會自動變成 O，
-# 這能教導模型不要把職位誤當成人名。
 
 # ==========================================
 # 2. 原始文本
@@ -24,7 +22,7 @@ raw_content = """港鐵新任行政總裁楊美珍昨履新，她今早（2日�
 原文網址：https://news.mingpao.com/ins/%E6%B8%AF%E8%81%9E/article/20260102/s00001/1767321394120"""
 
 # ==========================================
-# 3. 處理邏輯
+# 3. 處理邏輯 (已修正為 Word-level 兼容)
 # ==========================================
 def process_data(text):
     # A. 移除 URL
@@ -44,7 +42,6 @@ def process_data(text):
     if current_sent.strip(): segments.append(current_sent.strip())
 
     # C. 自動標註
-    # 確保 ID 與你的 train_lora.py 一致
     label2id = {
         "O": 0, "B-NAME": 1, "I-NAME": 2, 
         "B-ADDRESS": 3, "I-ADDRESS": 4, 
@@ -58,26 +55,49 @@ def process_data(text):
     final_data = []
 
     for sent in segments:
-        tokens = list(sent)
+        # [修正 1] 使用 smart_tokenize (Word-level)
+        tokens = smart_tokenize(sent) 
         tags = [label2id["O"]] * len(tokens)
         
-        # 1. 標註人名 (NAME)
-        for name in target_names:
-            for match in re.finditer(name, sent):
-                start, end = match.span()
-                tags[start] = label2id["B-NAME"]
-                for i in range(start + 1, end):
-                    tags[i] = label2id["I-NAME"]
-        
-        # 2. 標註機構 (ORG)
-        for org in target_orgs:
-            for match in re.finditer(org, sent):
-                start, end = match.span()
-                # 只有當該位置原本是 'O' 才標註，避免覆蓋人名 (雖由這篇文不會重疊)
-                if tags[start] == label2id["O"]: 
-                    tags[start] = label2id["B-ORG"]
-                    for i in range(start + 1, end):
-                        tags[i] = label2id["I-ORG"]
+        # [修正 2] 建立 Token 與 字符位置 的映射 (Token Spans)
+        # 這是最關鍵的一步：確保不管是 "MTR" (len 3) 還是 "楊" (len 1) 都能對準位置
+        token_spans = []
+        search_start = 0
+        for token in tokens:
+            # 在句子中尋找這個 token 的真實位置
+            start = sent.find(token, search_start)
+            if start == -1: 
+                token_spans.append(None)
+                continue
+            end = start + len(token)
+            token_spans.append((start, end)) # 記錄 (開始, 結束)
+            search_start = end
+
+        # 定義一個通用的標註函數
+        def apply_labels(targets, label_b, label_i):
+            for target in targets:
+                # 使用 re.escape 避免名字中有特殊符號導致 regex 報錯
+                for match in re.finditer(re.escape(target), sent):
+                    match_start, match_end = match.span()
+                    
+                    # 檢查每一個 Token 是否落在這個 match 的範圍內
+                    for idx, span in enumerate(token_spans):
+                        if span is None: continue
+                        t_start, t_end = span
+                        
+                        # 如果 Token 的範圍完全在 match 範圍內
+                        if t_start >= match_start and t_end <= match_end:
+                            # 如果是該實體的開頭
+                            if t_start == match_start:
+                                if tags[idx] == label2id["O"]: # 避免覆蓋
+                                    tags[idx] = label2id[label_b]
+                            else:
+                                if tags[idx] == label2id["O"]:
+                                    tags[idx] = label2id[label_i]
+
+        # 執行標註
+        apply_labels(target_names, "B-NAME", "I-NAME")
+        apply_labels(target_orgs, "B-ORG", "I-ORG")
         
         if len(tokens) > 0:
             final_data.append({
@@ -90,9 +110,10 @@ def process_data(text):
 # ==========================================
 # 4. 執行與儲存
 # ==========================================
+# 注意：這裡輸出檔名改為 news_data.json 以區分 mtr_news
 mtr_json_data = process_data(raw_content)
 
-output_file = "mtr_news_data.json"
+output_file = "news_data.json" 
 with open(output_file, "w", encoding="utf-8") as f:
     json.dump(mtr_json_data, f, ensure_ascii=False, indent=2)
 
