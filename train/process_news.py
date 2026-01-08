@@ -1,28 +1,23 @@
 import json
 import re
-# ✅ 引入共用的 tokenizer
 from data_utils.tokenizer import smart_tokenize 
 
 # ==========================================
-# 1. 定義要標註的清單
+# 1. 定義名單 (確保這裡有你要捉的字)
 # ==========================================
-
-# A. 機構 (ORG)
 target_orgs = [
     "中國國家鐵路集團有限公司",
     "國鐵集團"
 ]
 
-# B. 地名/地址 (ADDRESS) - ✅ 新增這個！
-# 根據你的新聞內容，我提取了出現過的地點
 target_addrs = [
     "大嶼山", "屯門", "北都", 
-    "長贛", "瀋白", # 雖然是高鐵線名，但通常包含地名，視乎你想不想標
+    "長贛", "瀋白", 
     "香港", "中國"
 ]
 
 # ==========================================
-# 2. 原始文本 (不變)
+# 2. 原始文本
 # ==========================================
 raw_content = """據中國國家鐵路集團有限公司今（4日）披露，鐵路「十四五」實現圓滿收官。「十四五」期間，全國鐵路營業里程由14.63萬公里增至16.5萬公里、增長12.8%，高鐵由3.79萬公里增至5.04萬公里、增長32.98%，中國建成世界規模最大、先進發達的高速鐵路網。
 
@@ -35,43 +30,25 @@ raw_content = """據中國國家鐵路集團有限公司今（4日）披露，�
 原文網址：https://news.mingpao.com/ins/%E5%85%A9%E5%B2%B8/article/20260104/s00004/1767518315152"""
 
 # ==========================================
-# 3. 處理邏輯
+# 3. 處理邏輯 (帶 Debug)
 # ==========================================
 def process_news(text):
-    # A. 簡單清洗
-    if "原文網址：" in text:
-        text = text.split("原文網址：")[0]
-
-    # B. 分句
+    print("🚀 開始處理新聞數據...")
+    
+    if "原文網址：" in text: text = text.split("原文網址：")[0]
     sentences = re.split(r'([。！？\n])', text)
-    segments = []
-    current_sent = ""
-    for s in sentences:
-        current_sent += s
-        if re.match(r'[。！？\n]', s):
-            if current_sent.strip():
-                segments.append(current_sent.strip())
-            current_sent = ""
-    if current_sent.strip(): segments.append(current_sent.strip())
-
-    # C. 自動標註
-    label2id = {
-        "O": 0, "B-NAME": 1, "I-NAME": 2, 
-        "B-ADDRESS": 3, "I-ADDRESS": 4, 
-        "B-PHONE": 5, "I-PHONE": 6, 
-        "B-ID": 7, "I-ID": 8, 
-        "B-ACCOUNT": 9, "I-ACCOUNT": 10,
-        "B-LICENSE_PLATE": 11, "I-LICENSE_PLATE": 12,
-        "B-ORG": 13, "I-ORG": 14
-    }
-
+    segments = [s.strip() for s in sentences if s.strip()]
+    
+    label2id = {"O": 0, "B-NAME": 1, "I-NAME": 2, "B-ADDRESS": 3, "I-ADDRESS": 4, "B-ORG": 13, "I-ORG": 14}
     final_data = []
+    
+    match_count = 0
 
     for sent in segments:
         tokens = smart_tokenize(sent)
-        tags = [label2id["O"]] * len(tokens)
+        tags = [0] * len(tokens) # 預設全為 O (ID=0)
         
-        # 建立 Alignment 映射
+        # --- 1. 建立 Alignment 映射 (Token -> Char) ---
         token_spans = []
         search_start = 0
         for token in tokens:
@@ -82,38 +59,40 @@ def process_news(text):
             end = start + len(token)
             token_spans.append((start, end))
             search_start = end
-
-        # 定義標註函數
-        def apply_labels(targets, label_b, label_i):
+            
+        # --- 2. 標註函數 (安全模式) ---
+        def apply_labels(targets, label_b, label_i, type_name):
+            nonlocal match_count
             for target in targets:
                 for match in re.finditer(re.escape(target), sent):
                     match_start, match_end = match.span()
                     
+                    # 找到了文字，現在要找對應的 Token
+                    found_tokens = False
                     for idx, span in enumerate(token_spans):
                         if span is None: continue
                         t_start, t_end = span
                         
+                        # 檢查 Token 是否在範圍內
                         if t_start >= match_start and t_end <= match_end:
-                            if t_start == match_start:
-                                if tags[idx] == label2id["O"]:
+                            # 🔥 防止覆蓋：只有當它是 0 的時候才標記
+                            if tags[idx] == 0:
+                                if t_start == match_start:
                                     tags[idx] = label2id[label_b]
-                            else:
-                                if tags[idx] == label2id["O"]:
+                                    print(f"  ✅ [捉到] {type_name}: {target} (Token: {tokens[idx]})")
+                                    match_count += 1
+                                else:
                                     tags[idx] = label2id[label_i]
-
-        # 執行標註
-        # 1. 標註機構
-        apply_labels(target_orgs, "B-ORG", "I-ORG")
+                                found_tokens = True
         
-        # 2. 標註地名 ✅ (新增這行)
-        apply_labels(target_addrs, "B-ADDRESS", "I-ADDRESS")
+        # 執行標註 (優先標 ORG，再標 Address)
+        apply_labels(target_orgs, "B-ORG", "I-ORG", "ORG")
+        apply_labels(target_addrs, "B-ADDRESS", "I-ADDRESS", "ADDR")
         
         if len(tokens) > 0:
-            final_data.append({
-                "tokens": tokens,
-                "ner_tags": tags
-            })
+            final_data.append({"tokens": tokens, "ner_tags": tags})
             
+    print(f"📊 總結：共捉到 {match_count} 個實體。")
     return final_data
 
 # ==========================================
@@ -125,7 +104,4 @@ output_file = "news_data.json"
 with open(output_file, "w", encoding="utf-8") as f:
     json.dump(news_json_data, f, ensure_ascii=False, indent=2)
 
-print(f"✅ 處理完成！共生成 {len(news_json_data)} 條新聞數據。")
-print(f"   - 已標註 ORG: {target_orgs}")
-print(f"   - 已標註 ADDRESS: {target_addrs}") # 顯示已標註的地名
-print(f"📁 檔案已儲存為: {output_file}")
+print(f"📁 news_data.json 已更新 (共 {len(news_json_data)} 條)。")
