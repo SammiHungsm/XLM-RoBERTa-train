@@ -186,7 +186,17 @@ def get_boundary_templates():
         ["Tel-", "{phone}", "。"],
         ["(Ref)", "{account}", "OK"],
         [">", "{account}", "<"],
-        ["#", "{id_num}", "#"]
+        ["#", "{id_num}", "#"],
+        
+        # data_utils/templates.py 加入：
+
+    
+        ["據", "{org}", "發言人", "{name}", "表示，公司將會進行改革。"],
+        ["著名傳記作家", "{name}", "即將出版新書，講述", "{org}", "的發展史。"],
+        ["警方拘捕了一名男子", "{name}", "，涉嫌與", "{addr}", "的案件有關。"],
+        ["{name}", "與", "{name}", "昨日在", "{addr}", "會面。"], # 兩個名字
+        ["關於", "{name}", "的指控，法庭正在審理中。"]
+    
     ]
 
 def get_anti_hallucination_templates():
