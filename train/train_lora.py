@@ -1,5 +1,6 @@
 import json
 import numpy as np
+import torch
 from datasets import Dataset
 from transformers import (
     AutoTokenizer, 
@@ -15,16 +16,30 @@ import evaluate
 # 1. 載入數據
 # ==========================================
 print("📂 正在載入數據...")
-with open("train_data_lora.json", "r", encoding="utf-8") as f:
-    raw = json.load(f)
-    data = raw["data"]
-    label2id = raw["label2id"]
-    # 確保 id2label 的 key 是整數
-    id2label = {int(k): v for k, v in raw["id2label"].items()}
+try:
+    with open("train_data_lora.json", "r", encoding="utf-8") as f:
+        raw = json.load(f)
+        data = raw["data"]
+        label2id = raw["label2id"]
+        # 確保 id2label 的 key 是整數
+        id2label = {int(k): v for k, v in raw["id2label"].items()}
+    print(f"✅ 成功載入 {len(data)} 條訓練數據")
+except FileNotFoundError:
+    print("❌ 錯誤：找不到 train_data_lora.json。請先執行 prepare_data.py！")
+    exit()
 
 dataset = Dataset.from_list(data)
 # 切分 10% 作為驗證集 (Test/Validation Set)
 dataset = dataset.train_test_split(test_size=0.1)
+
+# ==========================================
+# 1.5 數據完整性檢查 (Sanity Check)
+# ==========================================
+# 讓我們看看 smart_tokenize 的效果！
+print("\n🔎 數據樣本檢查 (Example 0):")
+print(f"Tokens: {dataset['train'][0]['tokens']}")
+print(f"Tags:   {dataset['train'][0]['ner_tags']}")
+print("(請確認上方的 Tokens 包含完整的英文單詞，例如 'Block' 而不是 'B','l'...) \n")
 
 # ==========================================
 # 2. 模型與分詞器
@@ -34,15 +49,17 @@ print(f"🤖 正在載入模型: {model_name}")
 tokenizer = AutoTokenizer.from_pretrained(model_name)
 
 # ==========================================
-# 3. Tokenization & Alignment (改良版)
+# 3. Tokenization & Alignment
 # ==========================================
 def tokenize_and_align_labels(examples):
+    # 這裡的 is_split_into_words=True 非常重要
+    # 因為我們的輸入已經是切分好的 List (smart_tokenize 的結果)
     tokenized_inputs = tokenizer(
         examples["tokens"], 
         is_split_into_words=True, 
         truncation=True, 
         padding="max_length", 
-        max_length=256  # 🔥 改良點 1: 提升到 256，確保長地址唔會被截斷
+        max_length=256 
     )
 
     labels = []
@@ -52,37 +69,43 @@ def tokenize_and_align_labels(examples):
         label_ids = []
         for word_idx in word_ids:
             if word_idx is None:
-                label_ids.append(-100) # 忽略特殊 token (如 [CLS], [SEP])
+                # 特殊 token (<s>, </s>) 設為 -100 (不計算 Loss)
+                label_ids.append(-100) 
             elif word_idx != previous_word_idx:
-                label_ids.append(label[word_idx]) # 只標記單詞的第一個 token
+                # 這是單詞的第一個 Subtoken -> 賦予真實 Label
+                # 因為我們現在用 smart_tokenize，這裡能確保 "Complex" 這個詞
+                # 只有它的第一個 subtoken 獲得 B-TAG，這對模型學習很有幫助
+                label_ids.append(label[word_idx]) 
             else:
-                label_ids.append(-100) # 同一個單詞的後續 token 設為 -100
+                # 同一個單詞的後續 Subtokens -> 設為 -100
+                # 例如 "Structure" 被切成 "Struc" + "ture"
+                # "ture" 會被標記為 -100，避免模型過度關注後綴
+                label_ids.append(-100) 
             previous_word_idx = word_idx
         labels.append(label_ids)
 
     tokenized_inputs["labels"] = labels
     return tokenized_inputs
 
-print("⚙️ 正在處理 Tokenization...")
+print("⚙️ 正在處理 Tokenization 及 Label Alignment...")
 tokenized_datasets = dataset.map(
     tokenize_and_align_labels, 
     batched=True,
-    remove_columns=dataset["train"].column_names # 移除原始文字欄位，避免格式衝突
+    remove_columns=dataset["train"].column_names # 移除原始文字欄位
 )
 
 # ==========================================
-# 4. 載入模型並配置 LoRA (改良版)
+# 4. 載入模型並配置 LoRA
 # ==========================================
 model = AutoModelForTokenClassification.from_pretrained(
     model_name, 
     num_labels=len(label2id),
     id2label=id2label,
     label2id=label2id,
-    ignore_mismatched_sizes=True # 允許最後一層分類器維度改變
+    ignore_mismatched_sizes=True 
 )
 
-# 🔥 改良點 2: 擴大 LoRA 訓練範圍
-# 加入 key, output, intermediate 層，讓模型更快適應新知識 (如香港地址格式)
+# 針對 NER 任務的 LoRA 配置
 peft_config = LoraConfig(
     task_type=TaskType.TOKEN_CLS, 
     inference_mode=False, 
@@ -98,31 +121,37 @@ print("--- LoRA 參數分佈 ---")
 model.print_trainable_parameters()
 
 # ==========================================
-# 5. 訓練參數 (改良版)
+# 5. 訓練參數
 # ==========================================
+# 自動檢測是否可以使用 fp16 (CUDA)
+use_fp16 = torch.cuda.is_available()
+print(f"⚡ GPU 加速模式: {'FP16 (CUDA)' if use_fp16 else 'FP32 (CPU/MPS)'}")
+
 args = TrainingArguments(
     output_dir="./lora_xlm_roberta_ner",
-    eval_strategy="epoch",        # 每個 epoch 評估一次
-    save_strategy="epoch",        # 每個 epoch 儲存一次 checkpoint
+    eval_strategy="epoch",        
+    save_strategy="epoch",        
     learning_rate=2e-4,
-    per_device_train_batch_size=8, # 顯存如果不夠 (OOM)，請改為 4
-    gradient_accumulation_steps=1, # 如果 batch 改為 4，建議這裡改為 2
+    per_device_train_batch_size=8, # 8G VRAM 建議 8; 4G VRAM 改 4
+    gradient_accumulation_steps=1, 
     num_train_epochs=5,
     weight_decay=0.01,
     logging_steps=50,
-    save_total_limit=2,           # 只保留最新的 2 個模型，慳位
+    save_total_limit=2,           
     remove_unused_columns=False,
+    load_best_model_at_end=True,  
+    metric_for_best_model="f1",   
     
-    # 🔥 改良點 3: 自動載入最佳模型 (防止 Overfitting)
-    load_best_model_at_end=True,  # 訓練結束時，自動 Load 返效果最好嗰個 Checkpoint
-    metric_for_best_model="f1",   # 以 F1 Score 作為標準
-    
-    # GPU 加速設定
-    fp16=True,                    # 混合精度 (速度快)
-    dataloader_num_workers=0      # Windows 建議設為 0
+    # 設備相關設置
+    fp16=use_fp16,                # 只有 NVIDIA GPU 才開 FP16
+    dataloader_num_workers=0      # Windows 必須設為 0
 )
 
-data_collator = DataCollatorForTokenClassification(tokenizer)
+# 加入 pad_to_multiple_of=8 可以讓 Tensor Core 運算更有效率
+data_collator = DataCollatorForTokenClassification(
+    tokenizer, 
+    pad_to_multiple_of=8 if use_fp16 else None
+)
 
 # ==========================================
 # 6. Metrics 評估函數

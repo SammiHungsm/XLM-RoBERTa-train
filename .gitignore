@@ -1,11 +1,29 @@
+# --- Python & Environment ---
 .env
-.venv
-*geojson_files
-*Chinese-Names-Corpus-master
-train_data_lora.json
-lora_xlm_roberta_ner
-final_lora_model*
+.venv/
 uv.lock
-./my_merged_pretrained_model/*
-my_merged_presidio_model
-final_lora_model
+__pycache__/
+*.pyc
+
+# --- Data & Corpus ---
+# 忽略原始數據文件夾
+geojson_files/
+Chinese-Names-Corpus-master/
+# 忽略生成的訓練數據
+train_data_lora.json
+
+# --- Models & Output ---
+# 訓練過程產生的模型 Checkpoints
+lora_xlm_roberta_ner/
+
+# 最終輸出的模型 (包含各種變體)
+final_lora_model/
+final_lora_model*
+
+# 合併後的模型
+my_merged_pretrained_model/
+my_merged_presidio_model/
+
+# --- IDE & System (Optional but recommended) ---
+.vscode/
+.DS_Store
