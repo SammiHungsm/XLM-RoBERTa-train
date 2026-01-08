@@ -1,29 +1,50 @@
-# --- Python & Environment ---
-.env
-.venv/
-uv.lock
+# --- 1. Python & System (標準配置) ---
 __pycache__/
 *.pyc
-
-# --- Data & Corpus ---
-# 忽略原始數據文件夾
-geojson_files/
-Chinese-Names-Corpus-master/
-# 忽略生成的訓練數據
-train_data_lora.json
-
-# --- Models & Output ---
-# 訓練過程產生的模型 Checkpoints
-lora_xlm_roberta_ner/
-
-# 最終輸出的模型 (包含各種變體)
-final_lora_model/
-final_lora_model*
-
-# 合併後的模型
-my_merged_pretrained_model/
-my_merged_presidio_model/
-
-# --- IDE & System (Optional but recommended) ---
-.vscode/
+*.pyo
 .DS_Store
+.env
+.venv/
+env/
+venv/
+uv.lock
+
+# --- 2. Data (數據區 - 重點修改) ---
+# 因為你依家有 data folder，建議忽略 data 裡面嘅具體內容
+# 但保留 data/ 本身嘅 folder 結構
+
+# 忽略所有 raw data (原始數據)
+data/raw/*
+data/negative_corpus/*
+
+# 忽略外部大型 Corpus (如果已經搬入 data/，就要指明路徑)
+data/Chinese-Names-Corpus-master/
+data/geojson_files/
+
+# --- 3. Generated Files (生成的訓練數據) ---
+# 忽略根目錄生成的 json
+train_data_lora.json
+# 忽略 data/processed 裡面生成的 json (如果你日後改路徑)
+data/processed/*.json
+# 忽略測試數據
+test_data.json
+src/training/test_data.json
+
+# --- 4. Models & Logs (模型輸出) ---
+# Checkpoints
+lora_xlm_roberta_ner/
+checkpoint-*/
+
+# Final Models
+final_lora_model/
+my_merged_presidio_model/
+my_merged_pretrained_model/
+
+# Logs (Tensorboard / Trainer logs)
+runs/
+logs/
+output/
+
+# --- 5. IDE Settings ---
+.vscode/
+.idea/
