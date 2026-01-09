@@ -96,7 +96,7 @@ def get_mixed_slang_templates():
     ]
 
 def get_long_entity_templates():
-    """Point 2 核心：強化長實體認知 (確保模型能認出完整的 ORG 和 ADDRESS)"""
+    """Point 2 & 4：強化長實體認知 (確保模型能認出完整的 ORG 和 ADDRESS)"""
     return [
         ["據 ", "{org}", " 今日披露，該項目已完工。"],
         ["", "{org}", " 分行地址位於 ", "{addr}", "。"],
@@ -114,6 +114,25 @@ def get_phone_variation_templates():
         ["Tel: (852) ", "{phone}", " (Office)"]
     ]
 
+def get_hong_kong_business_templates():
+    """🔥 Point 4 核心：針對香港商用環境的數據增強"""
+    return [
+        # --- 極長機構名 ---
+        ["現收到由 ", "{org}", " 發出嘅最新工程招標公告。"],
+        ["", "{org}", " 宣佈將於下月推行全港性嘅節能計劃。"],
+        # --- 中英混排地址 (香港特有格式) ---
+        ["公司地址位於 ", "{addr}", "，近港鐵站出口。"],
+        ["請將發票寄去 ", "{addr}", "，收件人係 ", "{name}", "。"],
+        ["Office Location: ", "{addr}", " (Attention to HR Department)."],
+        # --- 職位與姓名組合 (防止誤認職位為名) ---
+        ["我係 ", "{org}", " 嘅高級經理 ", "{name}", "，想同你 Confirm 返個期。"],
+        ["請聯絡行政總裁 ", "{name}", " 先生以獲取更多資訊。"],
+        ["Project Manager ", "{name}", " will be in charge of this task."],
+        # --- 專業法律/合約語境 ---
+        ["根據本合約，", "{name}", " (以下簡稱「甲方」) 需向 ", "{org}", " 支付費用。"],
+        ["授權代表：", "{name}", "，職位：", "{org}", " 總監。"]
+    ]
+
 def get_all_templates():
     """整合所有範本：商用足量完美版"""
     return (
@@ -125,5 +144,6 @@ def get_all_templates():
         get_extreme_anti_hallucination_templates() +
         get_mixed_slang_templates() +
         get_long_entity_templates() +
-        get_phone_variation_templates()
+        get_phone_variation_templates() +
+        get_hong_kong_business_templates() # 🔥 確保加入 Point 4
     )

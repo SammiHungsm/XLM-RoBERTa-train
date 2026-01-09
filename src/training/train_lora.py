@@ -62,15 +62,11 @@ def train():
             
             for word_idx in word_ids:
                 if word_idx is None:
-                    # 特殊 Token (如 [CLS], [SEP]) 保持 -100
                     label_ids.append(-100)
                 elif word_idx != previous_word_idx:
-                    # 每個單詞的第一個 Sub-token
                     label_ids.append(label[word_idx])
                 else:
-                    # 🔥 Point 3 核心修改：標籤傳播 (Label Propagation)
-                    # 對於同一個字拆出嚟嘅後續 Sub-tokens，我哋唔再俾 -100
-                    # 直接傳遞原始 Label，確保長實體（例如「有限公司」）成串字模型都收到學習訊號
+                    # 🔥 Point 3 核心：標籤傳播，確保模型學會長實體的連續性
                     label_ids.append(label[word_idx])
                 
                 previous_word_idx = word_idx
@@ -88,7 +84,7 @@ def train():
         remove_columns=dataset["train"].column_names
     )
 
-    # 4. 載入模型並配置 LoRA (Point 5 建議：調低 Learning Rate)
+    # 4. 載入模型並配置 LoRA
     model = AutoModelForTokenClassification.from_pretrained(
         BASE_MODEL_NAME, 
         num_labels=len(LABEL2ID),
@@ -119,18 +115,23 @@ def train():
             "recall": results["overall_recall"]
         }
 
-    # 6. 訓練參數 (Point 5 建議：Warmup + Lower LR)
+    # 6. 訓練參數 (Point 5 強化商用精調配置)
     args = TrainingArguments(
         output_dir="./lora_out",
         eval_strategy="steps",
         eval_steps=100,
         save_strategy="steps",
         save_steps=100,
-        learning_rate=2e-5,          # 🔥 Point 5：降低 LR 至 2e-5 更精細微調
-        warmup_ratio=0.1,            # 🔥 Point 5：加入 10% Warmup Steps
+        
+        # 🔥 Point 5 優化組合
+        learning_rate=2e-5,           # 低學習率確保精細微調
+        num_train_epochs=5,           # 配合低學習率增加 Epoch 確保收斂
+        lr_scheduler_type="cosine",    # 使用餘弦退火，收尾學得更靚
+        warmup_ratio=0.1,             # 加入熱身防止初期梯度不穩
+        weight_decay=0.01,            # 增加權重衰減防止過擬合
+        
         per_device_train_batch_size=4,
-        gradient_accumulation_steps=2,
-        num_train_epochs=3,
+        gradient_accumulation_steps=2, # Effective Batch Size = 8
         logging_steps=10,
         logging_dir='./logs',
         fp16=torch.cuda.is_available(),
@@ -155,7 +156,7 @@ def train():
         ]
     )
 
-    print("🚀 啟動強化版標籤對齊訓練...")
+    print("🚀 啟動強化版標籤對齊及商用精調訓練...")
     trainer.train()
 
     # 8. 儲存
