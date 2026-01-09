@@ -1,27 +1,36 @@
 import json
-import re
-# ✅ 引入共用的 tokenizer
-from data_utils.tokenizer import smart_tokenize
+import os
+import sys
+
+# 將專案根目錄加入路徑以引用 src
+current_dir = os.path.dirname(os.path.abspath(__file__))
+project_root = os.path.dirname(os.path.dirname(current_dir))
+sys.path.append(project_root)
+
+from src.dataset_builder import AutoLabeler  # 引用共用邏輯
+from src.config import LABEL2ID              # 引用共用設定
 
 # ==========================================
-# 1. 定義要標註的「真名名單」
+# 1. 定義要標註的資料 (Data Definition)
 # ==========================================
-target_names = [
-    # 主角一家
-    "福貴", "家珍", "鳳霞", "有慶", 
-    # 親戚與家族姓氏
-    "徐家", "陳老闆", 
-    # 配角
-    "長根", "沈先生", "龍二", 
-    # 牛的名字 (亦係人名)
-    "二喜", "苦根", 
-    # 名人
-    "蔣介石" 
-]
+# 根據建議：我們只捉「名字」本身，不捉稱謂
+entity_mapping = {
+    "B-NAME": [
+        "福貴", "家珍", "鳳霞", "有慶", 
+        "徐家", "長根", "龍二", "沈先生", "二喜", "苦根", "蔣介石",
+        "沈", "陳" # 這裡加上姓氏，以便處理「沈先生」、「陳老闆」
+    ],
+    # "B-ADDRESS": [
+    #     "青樓", "米行", "城裡", "鄉間", "大街上", "村口"
+    # ],
+    # "B-ORG": [
+    #     "國軍", "商會", "私塾"
+    # ]
+}
 
-# ==========================================
-# 2. 原始文本 (不變)
-# ==========================================
+# 稱謂黑名單：用於後處理，確保標記不包含這些字
+honorifics = ["先生", "小姐", "女士", "老闆", "老爺"]
+
 raw_content = """第一章
 
     我比現在年輕十歲的時候，獲得了一個遊手好閒的職業，去鄉間收集民間歌謠。那一年的整個夏天，我如同一隻亂飛的麻雀，遊盪在知了和陽光充斥的村舍田野。我喜歡喝農民那種帶有苦味的茶水，他們的茶桶就放在田埂的樹下，我毫無顧忌地拿起漆滿茶垢的茶碗舀水喝，還把自己的水壺灌滿，與田裡幹活的男人說上幾句廢話，在姑娘因我而起的竊竊私笑里揚長而去。我曾經和一位守著瓜田的老人聊了整整一個下午，這是我有生以來瓜吃得最多的一次，當我站起來告辭時，突然發現自己像個孕婦一樣步履艱難了。然後我與一位當上了祖母的女人坐在門檻上，她編著草鞋為我唱了一支《十月懷胎》。我最喜歡的是傍晚來到時，坐在農民的屋前，看著他們將提上的井水潑在地上，壓住蒸騰的塵土，夕陽的光芒在樹梢上照射下來，拿一把他們遞過來的扇子，嘗嘗他們和鹽一樣鹹的鹹菜，看看幾個年輕女人，和男人們說著話。
@@ -181,74 +190,35 @@ raw_content = """第一章
 
 
 # ==========================================
-# 3. 數據清洗與標註邏輯
+# 2. 執行處理 (Execution)
 # ==========================================
-def process_novel(text):
-    # A. 簡單分句
-    sentences = re.split(r'([。！？\n])', text)
-    segments = []
-    current_sent = ""
-    for s in sentences:
-        current_sent += s
-        if re.match(r'[。！？\n]', s):
-            if current_sent.strip():
-                segments.append(current_sent.strip())
-            current_sent = ""
-    if current_sent.strip(): segments.append(current_sent.strip())
+if __name__ == "__main__":
+    # 1. 初始化標註器
+    labeler = AutoLabeler()
+    
+    # 2. 執行通用標註邏輯
+    novel_data = labeler.process(raw_content, entity_mapping)
 
-    # Label ID 確保與 master list 一致 (可選)
-    label2id = {"O": 0, "B-NAME": 1, "I-NAME": 2, "B-ORG": 13, "I-ORG": 14} 
-    final_data = []
+    # 3. 🔥 後處理：過濾掉人名標記中的「稱謂」
+    # 這是為了確保與 MTR 數據風格一致
+    for item in novel_data:
+        tokens = item["tokens"]
+        tags = item["ner_tags"]
+        for idx, token in enumerate(tokens):
+            # 如果這個 token 被標為人名，但它其實是稱謂
+            if tags[idx] in [LABEL2ID["B-NAME"], LABEL2ID["I-NAME"]]:
+                if any(h in token for h in honorifics):
+                    tags[idx] = 0 # 改回 "O"
 
-    for sent in segments:
-        tokens = smart_tokenize(sent)
-        tags = [0] * len(tokens) # 預設全為 O (ID=0)
+    # 4. 儲存檔案
+    output_dir = "./data/raw"
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir, exist_ok=True)
         
-        # 🔥 關鍵修復：建立 Token 位置映射
-        token_spans = []
-        search_start = 0
-        for token in tokens:
-            start = sent.find(token, search_start)
-            if start == -1:
-                token_spans.append(None)
-                continue
-            end = start + len(token)
-            token_spans.append((start, end))
-            search_start = end # 確保向前搜尋
+    output_file = os.path.join(output_dir, "novel_data.json")
+    with open(output_file, "w", encoding="utf-8") as f:
+        json.dump(novel_data, f, ensure_ascii=False, indent=2)
 
-        # 標註邏輯
-        for name in target_names:
-            for match in re.finditer(re.escape(name), sent):
-                match_start, match_end = match.span()
-                
-                for idx, span in enumerate(token_spans):
-                    if span is None: continue
-                    t_start, t_end = span
-                    
-                    # 檢查 Token 是否在名字範圍內
-                    if t_start >= match_start and t_end <= match_end:
-                        if t_start == match_start:
-                            # ✅ Best Practice: 防止覆蓋 (如果已經有標籤，就不改)
-                            if tags[idx] == 0: 
-                                tags[idx] = label2id["B-NAME"]
-                        else:
-                            # ✅ Best Practice: 防止覆蓋
-                            if tags[idx] == 0:
-                                tags[idx] = label2id["I-NAME"]
-        
-        if len(tokens) > 0:
-            final_data.append({"tokens": tokens, "ner_tags": tags})
-            
-    return final_data
-
-# ==========================================
-# 4. 執行與儲存
-# ==========================================
-novel_json_data = process_novel(raw_content)
-
-output_file = "novel_data.json"
-with open(output_file, "w", encoding="utf-8") as f:
-    json.dump(novel_json_data, f, ensure_ascii=False, indent=2)
-
-print(f"✅ 處理完成！共生成 {len(novel_json_data)} 條已標註數據。")
-print(f"📁 檔案已儲存為: {output_file}")
+    print(f"✅ 搞掂！小說數據已處理並儲存。")
+    print(f"   - 已自動過濾稱謂: {honorifics}")
+    print(f"📁 檔案位置: {output_file}")

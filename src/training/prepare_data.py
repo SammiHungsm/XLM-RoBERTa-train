@@ -1,154 +1,79 @@
-import random
 import json
-import re
-from faker import Faker
+import os
+import random
+import sys
 
-# ✅ 1. 從共用模組導入 smart_tokenize (確保邏輯統一)
-from data_utils.tokenizer import smart_tokenize
+# 加入路徑以引用 src.config
+current_dir = os.path.dirname(os.path.abspath(__file__))
+project_root = os.path.dirname(os.path.dirname(current_dir))
+sys.path.append(project_root)
 
-# 引入自定義模組
-# 注意：你需要確保 train/data_utils/__init__.py 存在
-from data_utils.generators import get_random_fillers
-from data_utils.loaders import load_names, load_addresses, load_negative_samples, load_pre_annotated_data
-from data_utils.templates import get_all_templates
+from src.config import LABEL2ID, ID2LABEL
 
-fake = Faker(['en_US', 'zh_TW'])
+# 零錯誤過濾名單 (與合成腳本保持一致)
+STRICT_FORBIDDEN = ["中國", "國鐵", "港鐵", "MTR", "鐵路", "集團", "有限公司", "十四五", "十五五"]
 
-# ❌ 已刪除重複定義的 def smart_tokenize(text)... 區塊
+def load_json(path):
+    if not os.path.exists(path):
+        print(f"⚠️ 找不到檔案: {path}")
+        return []
+    with open(path, "r", encoding="utf-8") as f:
+        return json.load(f)
 
-def create_dataset_safe(names, addresses, label2id, negative_texts=[], target_count=None):
-    data = []
-    templates = get_all_templates() # 從 templates.py 獲取
+def is_clean(item):
+    """
+    零錯誤防線：檢查合成數據中是否有任何禁止詞被標記為 'O' (0)
+    """
+    tokens = item.get("tokens", [])
+    tags = item.get("ner_tags", [])
     
-    if target_count is None: target_count = len(addresses)
-
-    # 正負樣本比例 (85% : 15%)
-    pos_count = int(target_count * 0.85)
-    neg_count = target_count - pos_count
-    
-    print(f"🚀 生成數據中... (Template生成: {pos_count}, 純文本負樣本: {neg_count})")
-    
-    for _ in range(pos_count):
-        template_parts = random.choice(templates)
-        
-        # 使用 generators.py 的邏輯獲取填充內容
-        fillers = get_random_fillers(names, addresses)
-        
-        full_tokens = []
-        full_tags = []
-        
-        for part in template_parts:
-            # 1. 獲取文本內容
-            text_segment = ""
-            entity_type = "O"
-            
-            if part in fillers:
-                text_segment = fillers[part]
-                # 判斷實體類型
-                if part == "{name}": entity_type = "NAME"
-                elif part == "{addr}": entity_type = "ADDRESS"
-                elif part == "{phone}": entity_type = "PHONE"
-                elif part == "{id_num}": entity_type = "ID"
-                elif part == "{account}": entity_type = "ACCOUNT"
-                elif part == "{plate}": entity_type = "LICENSE_PLATE"
-                elif part == "{org}": entity_type = "ORG"
-            else:
-                # 固定文字 (包括陷阱詞)
-                text_segment = part
-
-            # 2. 使用 Smart Tokenize 代替 list() [核心修改點]
-            tokens = smart_tokenize(text_segment)
-            
-            if not tokens: continue
-            
-            full_tokens.extend(tokens)
-            
-            # 3. 生成對應的 Tags (按 Token 數量)
-            if entity_type != "O":
-                # 第一個 token 是 B-TAG
-                full_tags.append(label2id[f"B-{entity_type}"])
-                # 剩下的 tokens 是 I-TAG
-                if len(tokens) > 1:
-                    full_tags.extend([label2id[f"I-{entity_type}"]] * (len(tokens) - 1))
-            else:
-                full_tags.extend([label2id["O"]] * len(tokens))
-        
-        data.append({"tokens": full_tokens, "ner_tags": full_tags})
-    
-    # 加入純文本負樣本 (Novel/News raw text)
-    if negative_texts:
-        for i in range(neg_count):
-            sent = negative_texts[i % len(negative_texts)]
-            # 這裡也改用 smart_tokenize
-            full_tokens = smart_tokenize(sent)
-            full_tags = [label2id["O"]] * len(full_tokens)
-            data.append({"tokens": full_tokens, "ner_tags": full_tags})
-    else:
-        # Fallback Faker sentences
-        for _ in range(neg_count):
-            sent = fake.sentence()
-            full_tokens = smart_tokenize(sent)
-            full_tags = [label2id["O"]] * len(full_tokens)
-            data.append({"tokens": full_tokens, "ner_tags": full_tags})
-
-    random.shuffle(data)
-    return data
+    for i, t in enumerate(tokens):
+        # 如果 Token 包含禁止詞，但標籤卻是 0 (O)
+        if any(word in t for word in STRICT_FORBIDDEN) and tags[i] == 0:
+            return False
+    return True
 
 if __name__ == "__main__":
-    label_list = ["O", "B-NAME", "I-NAME", "B-ADDRESS", "I-ADDRESS", "B-PHONE", "I-PHONE", "B-ID", "I-ID", "B-ACCOUNT", "I-ACCOUNT", "B-LICENSE_PLATE", "I-LICENSE_PLATE", "B-ORG", "I-ORG"]
-    label2id = {l: i for i, l in enumerate(label_list)}
+    # 1. 讀取各方來源
+    news = load_json("./data/raw/news_data.json")
+    novel = load_json("./data/raw/novel_data.json")
+    mtr = load_json("./data/raw/mtr_news_data.json")
+    synthetic_raw = load_json("./data/raw/synthetic_data.json")
 
-    # 1. 載入外部數據 (請確保這些路徑下的文件存在)
-    # 建議：可以使用 Config 字典管理路徑，但為了保持代碼簡單，這裡維持原樣
-    try:
-        names_pool = load_names("./Chinese-Names-Corpus-master") 
-        addr_pool = load_addresses("./geojson_files")
-        negative_pool = load_negative_samples("./negative_corpus", max_samples=10000)
-    except FileNotFoundError as e:
-        print(f"⚠️ 警告：找不到數據文件 ({e})，請檢查路徑。將使用空數據繼續...")
-        names_pool, addr_pool, negative_pool = [], [], []
+    # 2. 🛡️ 執行零錯誤過濾 (針對合成數據)
+    print(f"🛡️ 正在執行合成數據最終清洗 (原始數量: {len(synthetic_raw)})...")
+    synthetic_cleaned = [d for d in synthetic_raw if is_clean(d)]
+    removed_count = len(synthetic_raw) - len(synthetic_cleaned)
+    if removed_count > 0:
+        print(f"🚫 已自動剔除 {removed_count} 條標籤污染的合成樣本。")
 
-    # 2. 生成合成數據
-    # 注意：如果 addr_pool 為空，這裡可能會報錯或生成空數據
-    training_data = create_dataset_safe(
-        names_pool, 
-        addr_pool, 
-        label2id, 
-        negative_texts=negative_pool,
-        target_count=50000 
-    )
+    all_training_data = []
 
-    # 3. 合併預處理數據 (進行 Upsampling / 倍增)
-    # 我們將真實數據重複多次，確保模型在訓練時「多看幾眼」
-    novel_data = load_pre_annotated_data("novel_data.json")
-    news_data = load_pre_annotated_data("news_data.json")
-    mtr_data = load_pre_annotated_data("mtr_news_data.json")
-
-    # 小說數據量尚可，重複 5 次
-    if novel_data:
-        print(f"📈 將小說數據倍增 5 倍 (總數: {len(novel_data) * 5})")
-        training_data.extend(novel_data * 5)
-
-    # 新聞數據極少但極重要 (教導忽略數字)，重複 50 次！
-    if news_data:
-        print(f"📈 將鐵路新聞數據倍增 50 倍 (總數: {len(news_data) * 50})")
-        training_data.extend(news_data * 50)
-
-    # 港鐵數據是混合樣本，重複 50 次！
-    if mtr_data:
-        print(f"📈 將港鐵新聞數據倍增 50 倍 (總數: {len(mtr_data) * 50})")
-        training_data.extend(mtr_data * 50)
-        
-    random.shuffle(training_data)
-    print(f"🚀 最終數據集總量: {len(training_data)} 條")
-
-    output_data = {
-        "data": training_data, 
-        "label2id": label2id, 
-        "id2label": {str(v): k for k, v in label2id.items()}
-    }
+    # 3. 按權重合併數據
+    # 權重分配邏輯說明：
+    # - 新聞與 MTR 數據修正後精確度最高且具備鐵路專業知識，需強行增強記憶 (x50)
+    # - 小說數據用於學習口語與姓名 (x5)
+    # - 合成數據用於學習身分證/電話等格式 (x1)
     
-    with open("train_data_lora.json", "w", encoding="utf-8") as f:
-        json.dump(output_data, f, ensure_ascii=False)
-        
-    print("✅ 數據準備完成！train_data_lora.json 已更新。")
+    all_training_data.extend(synthetic_cleaned)   # 基數大，不重複
+    all_training_data.extend(news * 50)           # 重要新聞
+    all_training_data.extend(novel * 5)           # 小說文本
+    all_training_data.extend(mtr * 50)            # 港鐵數據
+
+    # 4. 打散數據
+    random.shuffle(all_training_data)
+
+    # 5. 封裝並輸出
+    output = {
+        "data": all_training_data,
+        "label2id": LABEL2ID,
+        "id2label": ID2LABEL
+    }
+
+    output_path = "train_data_lora.json"
+    with open(output_path, "w", encoding="utf-8") as f:
+        json.dump(output, f, ensure_ascii=False, indent=2)
+
+    print(f"🚀 最終訓練集打包完成！")
+    print(f"📊 總樣本數: {len(all_training_data)}")
+    print(f"📁 檔案已儲存至: {output_path}")
