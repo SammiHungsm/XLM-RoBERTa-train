@@ -20,6 +20,7 @@ dependencies = [
     "seqeval>=1.2.2",
     "spacy==3.7.5",
     "spacy-huggingface-pipelines>=0.0.4",
+    "tensorboard>=2.20.0",
     "torch>=2.6.0",
     "torchaudio>=2.6.0",
     "torchvision>=0.21.0",

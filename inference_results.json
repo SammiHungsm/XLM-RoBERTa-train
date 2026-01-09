@@ -1,0 +1,1261 @@
+[
+  {
+    "id": 0,
+    "original": "據中國國家鐵路集團有限公司今（4日）披露，鐵路「十四五」實現圓滿收官。「十四五」期間，全國鐵路營業里程由14.63萬公里增至16.5萬公里、增長12.8%，高鐵由3.79萬公里增至5.04萬公里、增長32.98%，中國建成世界規模最大、先進發達的高速鐵路網。2025年，國鐵集團加快建設現代化鐵路基礎設施體系，圓滿完成鐵路建設任務，全國鐵路完成固定資產投資9015億元人民幣、同比增長6%，投產新線3109公里，其中高鐵2862公里，鐵路投資拉動作用充分顯現。2025年，國鐵集團以國家「十四五」規劃綱要確定的102項重大工程鐵路項目和「兩重」項目為重點，加大實施力度，長贛高鐵等8個項目開工建設，瀋白高鐵等25個項目開通運營。加快物流基礎設施建設，建成鐵路專用線52條。「十五五」期間，國鐵集團將進一步推進鐵路網建設。到2030年，全國鐵路營業里程達到18萬公里左右，其中高鐵6萬公里左右，復線率和電氣化率分別達到64%和78%，戰略骨幹通道全面加強，「八縱八橫」高鐵系統成網，區域互聯互通水平顯著提升，貨運網絡能力大幅增強，基本建成世界一流的現代化鐵路網。原文網址：https://news.mingpao.com/ins/%E5%85%A9%E5%B2%B8/article/20260104/s00004/1767518315152",
+    "masked": "據[ORG-01]今（4日）披露，鐵路「十四五」實現圓滿收官。「十四五」期間，全國鐵路營業里程由14.63萬公里增至16.5萬公里、增長12.8%，高鐵由3.79萬公里增至5.04萬公里、增長32.98%，[ADDRESS-01]建成世界規模最大、先進發達的高速鐵路網。2025年，[ORG-02]集團加快建設現代化鐵路基礎設施體系，圓滿完成鐵路建設任務，全國鐵路完成固定資產投資9015億元人民幣、同比增長6%，投產新線3109公里，其中高鐵2862公里，鐵路投資拉動作用充分顯現。2025年，[ORG-02]集團以國家「十四五」規劃綱要確定的102項重大工程鐵路項目和「兩重」項目為重點，加大實施力度，[ORG-03][ADDRESS-02]高鐵等8個項目開工建設，[ORG-04][ADDRESS-03]高鐵等25個項目開通運營。加快物流基礎設施建設，建成鐵路專用線52條。「十五五」期間，[ORG-02]集團將進一步推進鐵路網建設。到2030年，全國鐵路營業里程達到18萬公里左右，其中高鐵6萬公里左右，復線率和電氣化率分別達到64%和78%，戰略骨幹通道全面加強，「八縱八橫」高鐵系統成網，區域互聯互通水平顯著提升，貨運網絡能力大幅增強，基本建成世界一流的現代化鐵路網。原文網址：https://news.mingpao.com/ins/%E5%85%A9%E5%B2%B8/article/[PHONE-01]/s00004/1767518315152",
+    "entities": [
+      {
+        "entity_group": "ORG",
+        "score": 0.7831708788871765,
+        "word": "中國國家鐵路集團有限公司",
+        "start": 1,
+        "end": 13,
+        "numbered_tag": "ORG-01"
+      },
+      {
+        "entity_group": "ADDRESS",
+        "score": 0.8916462659835815,
+        "word": "中國",
+        "start": 107,
+        "end": 109,
+        "numbered_tag": "ADDRESS-01"
+      },
+      {
+        "entity_group": "ORG",
+        "score": 0.5997124314308167,
+        "word": "國鐵",
+        "start": 135,
+        "end": 137,
+        "numbered_tag": "ORG-02"
+      },
+      {
+        "entity_group": "ORG",
+        "score": 0.783734142780304,
+        "word": "國鐵",
+        "start": 236,
+        "end": 238,
+        "numbered_tag": "ORG-02"
+      },
+      {
+        "entity_group": "ORG",
+        "score": 0.5467384457588196,
+        "word": "長",
+        "start": 285,
+        "end": 286,
+        "numbered_tag": "ORG-03"
+      },
+      {
+        "entity_group": "ADDRESS",
+        "score": 0.5597876906394958,
+        "word": "贛",
+        "start": 286,
+        "end": 287,
+        "numbered_tag": "ADDRESS-02"
+      },
+      {
+        "entity_group": "ORG",
+        "score": 0.6635185480117798,
+        "word": "瀋",
+        "start": 299,
+        "end": 300,
+        "numbered_tag": "ORG-04"
+      },
+      {
+        "entity_group": "ADDRESS",
+        "score": 0.6616450548171997,
+        "word": "白",
+        "start": 300,
+        "end": 301,
+        "numbered_tag": "ADDRESS-03"
+      },
+      {
+        "entity_group": "ORG",
+        "score": 0.7064498662948608,
+        "word": "國鐵",
+        "start": 344,
+        "end": 346,
+        "numbered_tag": "ORG-02"
+      },
+      {
+        "entity_group": "PHONE",
+        "word": "20260104",
+        "start": 541,
+        "end": 549,
+        "score": 1.0,
+        "numbered_tag": "PHONE-01"
+      }
+    ]
+  },
+  {
+    "id": 1,
+    "original": "李嘉誠好有錢，仲要住係香港中環皇后大道中 33 號萬宜大廈 12 樓，年齡 82 歲。其出生地未有記錄，父母不健在，目前從事兼職工作。聯絡電話為 +852 9123 4567。曾任職於長和主席。",
+    "masked": "[NAME-01]好有錢，仲要住係[ADDRESS-01]，年齡 82 歲。其出生地未有記錄，父母不健在，目前從事兼職工作。聯絡電話為 +[PHONE-01][PHONE-02][PHONE-03]123 4567。曾任職於[ORG-01]和主席。",
+    "entities": [
+      {
+        "entity_group": "NAME",
+        "score": 0.999338686466217,
+        "word": "李嘉誠",
+        "start": 0,
+        "end": 3,
+        "numbered_tag": "NAME-01"
+      },
+      {
+        "entity_group": "ADDRESS",
+        "score": 0.8794854283332825,
+        "word": "香港中環皇后大道中 33 號萬宜大廈 12 樓",
+        "start": 11,
+        "end": 34,
+        "numbered_tag": "ADDRESS-01"
+      },
+      {
+        "entity_group": "PHONE",
+        "score": 0.5338599681854248,
+        "word": "85",
+        "start": 74,
+        "end": 76,
+        "numbered_tag": "PHONE-01"
+      },
+      {
+        "entity_group": "PHONE",
+        "score": 0.49685007333755493,
+        "word": "2",
+        "start": 76,
+        "end": 77,
+        "numbered_tag": "PHONE-02"
+      },
+      {
+        "entity_group": "PHONE",
+        "score": 0.7536937594413757,
+        "word": "9",
+        "start": 77,
+        "end": 79,
+        "numbered_tag": "PHONE-03"
+      },
+      {
+        "entity_group": "ORG",
+        "score": 0.6235077977180481,
+        "word": "長",
+        "start": 92,
+        "end": 93,
+        "numbered_tag": "ORG-01"
+      }
+    ]
+  },
+  {
+    "id": 2,
+    "original": "Li Ka-shing is widely recognized as one of the wealthiest individuals in Hong Kong, with a reputation that extends far beyond the city itself. He currently resides at 12/F, Man Yee Building, 33 Queen’s Road Central. At the age of 82.",
+    "masked": "[NAME-01] is widely recognized as one of the wealthiest individuals in[ADDRESS-01], with a reputation that extends far beyond the city itself. He currently resides at[ADDRESS-02]. At the age of 82.",
+    "entities": [
+      {
+        "entity_group": "NAME",
+        "score": 0.998944878578186,
+        "word": "Li Ka-shing",
+        "start": 0,
+        "end": 11,
+        "numbered_tag": "NAME-01"
+      },
+      {
+        "entity_group": "ADDRESS",
+        "score": 0.8928061723709106,
+        "word": "Hong Kong",
+        "start": 72,
+        "end": 82,
+        "numbered_tag": "ADDRESS-01"
+      },
+      {
+        "entity_group": "ADDRESS",
+        "score": 0.8179383873939514,
+        "word": "12/F, Man Yee Building, 33 Queen’s Road Central",
+        "start": 166,
+        "end": 214,
+        "numbered_tag": "ADDRESS-02"
+      }
+    ]
+  },
+  {
+    "id": 3,
+    "original": "Li Ka-shing is very wealthy and resides at 12/F, Man Yee Building, 33 Queen’s Road Central, Hong Kong. His contact number is +852 9123 4567. He previously served as Chairman of Cheung Kong Holdings.",
+    "masked": "[NAME-01] is very wealthy and resides at[ADDRESS-01],[ADDRESS-02],[ADDRESS-03]. His contact number is +852[PHONE-01]123 4567. He previously served as Chairman of[ORG-01].",
+    "entities": [
+      {
+        "entity_group": "NAME",
+        "score": 0.9978702068328857,
+        "word": "Li Ka-shing",
+        "start": 0,
+        "end": 11,
+        "numbered_tag": "NAME-01"
+      },
+      {
+        "entity_group": "ADDRESS",
+        "score": 0.8067448139190674,
+        "word": "12/F, Man Yee Building",
+        "start": 42,
+        "end": 65,
+        "numbered_tag": "ADDRESS-01"
+      },
+      {
+        "entity_group": "ADDRESS",
+        "score": 0.7996322512626648,
+        "word": "33 Queen’s Road Central",
+        "start": 66,
+        "end": 90,
+        "numbered_tag": "ADDRESS-02"
+      },
+      {
+        "entity_group": "ADDRESS",
+        "score": 0.881301760673523,
+        "word": "Hong Kong",
+        "start": 91,
+        "end": 101,
+        "numbered_tag": "ADDRESS-03"
+      },
+      {
+        "entity_group": "PHONE",
+        "score": 0.8334389328956604,
+        "word": "9",
+        "start": 129,
+        "end": 131,
+        "numbered_tag": "PHONE-01"
+      },
+      {
+        "entity_group": "ORG",
+        "score": 0.7364304661750793,
+        "word": "Cheung Kong Holdings",
+        "start": 176,
+        "end": 197,
+        "numbered_tag": "ORG-01"
+      }
+    ]
+  },
+  {
+    "id": 4,
+    "original": "已知李嘉誠居住於 Hong Kong Kwun Tong 99 號 AIA Tower 8/F，他今年 31 歲，電話號碼為 +852 9167 8920，曾經擔任過 Deliveroo 外賣員一職，我想知同佢有關嘅人嘅資料",
+    "masked": "已知[NAME-01]居住於[ADDRESS-01]，他今年 31 歲，電話號碼為 +[PHONE-01][PHONE-02][PHONE-03]167 8920，曾經擔任過[ORG-01]veroo 外賣員一職，我想知同佢有關嘅人嘅資料",
+    "entities": [
+      {
+        "entity_group": "NAME",
+        "score": 0.9993045330047607,
+        "word": "李嘉誠",
+        "start": 2,
+        "end": 5,
+        "numbered_tag": "NAME-01"
+      },
+      {
+        "entity_group": "ADDRESS",
+        "score": 0.9014602303504944,
+        "word": "Hong Kong Kwun Tong 99 號 AIA Tower 8/F",
+        "start": 8,
+        "end": 47,
+        "numbered_tag": "ADDRESS-01"
+      },
+      {
+        "entity_group": "PHONE",
+        "score": 0.7547090649604797,
+        "word": "85",
+        "start": 64,
+        "end": 66,
+        "numbered_tag": "PHONE-01"
+      },
+      {
+        "entity_group": "PHONE",
+        "score": 0.7453433275222778,
+        "word": "2",
+        "start": 66,
+        "end": 67,
+        "numbered_tag": "PHONE-02"
+      },
+      {
+        "entity_group": "PHONE",
+        "score": 0.8751010894775391,
+        "word": "9",
+        "start": 67,
+        "end": 69,
+        "numbered_tag": "PHONE-03"
+      },
+      {
+        "entity_group": "ORG",
+        "score": 0.9286477565765381,
+        "word": "Deli",
+        "start": 83,
+        "end": 88,
+        "numbered_tag": "ORG-01"
+      }
+    ]
+  },
+  {
+    "id": 5,
+    "original": "已知 A 君現居於香港觀塘道 99 號 AIA Tower 八樓，年齡 31 歲。聯絡電話為 +852 9167 8920。過往曾任職 Deliveroo 外賣員，具備相關工作經驗。請為我搜尋相關資料",
+    "masked": "已知[NAME-01]現居於[ADDRESS-01]，年齡 31 歲。聯絡電話為 +[PHONE-01][PHONE-02][PHONE-03]167 8920。過往曾任職[ORG-01]o 外賣員，具備相關工作經驗。請為我搜尋相關資料",
+    "entities": [
+      {
+        "entity_group": "NAME",
+        "score": 0.9837334752082825,
+        "word": "A 君",
+        "start": 2,
+        "end": 6,
+        "numbered_tag": "NAME-01"
+      },
+      {
+        "entity_group": "ADDRESS",
+        "score": 0.8275050520896912,
+        "word": "香港觀塘道 99 號 AIA Tower 八樓",
+        "start": 9,
+        "end": 32,
+        "numbered_tag": "ADDRESS-01"
+      },
+      {
+        "entity_group": "PHONE",
+        "score": 0.8018295764923096,
+        "word": "85",
+        "start": 48,
+        "end": 50,
+        "numbered_tag": "PHONE-01"
+      },
+      {
+        "entity_group": "PHONE",
+        "score": 0.8107104301452637,
+        "word": "2",
+        "start": 50,
+        "end": 51,
+        "numbered_tag": "PHONE-02"
+      },
+      {
+        "entity_group": "PHONE",
+        "score": 0.8411836624145508,
+        "word": "9",
+        "start": 51,
+        "end": 53,
+        "numbered_tag": "PHONE-03"
+      },
+      {
+        "entity_group": "ORG",
+        "score": 0.7141107320785522,
+        "word": "Delivero",
+        "start": 67,
+        "end": 76,
+        "numbered_tag": "ORG-01"
+      }
+    ]
+  },
+  {
+    "id": 6,
+    "original": "我叫李嘉誠，我嘅身份證號碼係 R1234567(A)，我係12月1號下午嘗試申請強積金整合，但未能成功，並顯示古怪錯誤，請盡快處理。",
+    "masked": "我叫[NAME-01]，我嘅身份證號碼係[ID-01]567[ID-02]，我係12月1號下午嘗試申請強積金整合，但未能成功，並顯示古怪錯誤，請盡快處理。",
+    "entities": [
+      {
+        "entity_group": "NAME",
+        "score": 0.9996275901794434,
+        "word": "李嘉誠",
+        "start": 2,
+        "end": 5,
+        "numbered_tag": "NAME-01"
+      },
+      {
+        "entity_group": "ID",
+        "score": 0.5598776340484619,
+        "word": "R1234",
+        "start": 14,
+        "end": 20,
+        "numbered_tag": "ID-01"
+      },
+      {
+        "entity_group": "ID",
+        "score": 0.5993223190307617,
+        "word": "A)",
+        "start": 23,
+        "end": 26,
+        "numbered_tag": "ID-02"
+      }
+    ]
+  },
+  {
+    "id": 7,
+    "original": "你好，我係 Sammi。我住係 Tuen Mun 屯門市廣場 10 樓。",
+    "masked": "你好，我係[NAME-01]。我住係[ADDRESS-01]。",
+    "entities": [
+      {
+        "entity_group": "NAME",
+        "score": 0.992460310459137,
+        "word": "Sammi",
+        "start": 5,
+        "end": 11,
+        "numbered_tag": "NAME-01"
+      },
+      {
+        "entity_group": "ADDRESS",
+        "score": 0.8942732810974121,
+        "word": "Tuen Mun 屯門市廣場 10 樓",
+        "start": 15,
+        "end": 35,
+        "numbered_tag": "ADDRESS-01"
+      }
+    ]
+  },
+  {
+    "id": 8,
+    "original": "我的電話係 9123 4567。身分證 A123456(7)。",
+    "masked": "我的電話係[PHONE-01]123 4567。身分證 A123456[ID-01]。",
+    "entities": [
+      {
+        "entity_group": "PHONE",
+        "score": 0.8619338870048523,
+        "word": "9",
+        "start": 5,
+        "end": 7,
+        "numbered_tag": "PHONE-01"
+      },
+      {
+        "entity_group": "ID",
+        "score": 0.5816131830215454,
+        "word": "7",
+        "start": 27,
+        "end": 30,
+        "numbered_tag": "ID-01"
+      }
+    ]
+  },
+  {
+    "id": 9,
+    "original": "Sammi 之前打過黎。",
+    "masked": "[NAME-01] 之前打過黎。",
+    "entities": [
+      {
+        "entity_group": "NAME",
+        "score": 0.9732733368873596,
+        "word": "Sammi",
+        "start": 0,
+        "end": 5,
+        "numbered_tag": "NAME-01"
+      }
+    ]
+  },
+  {
+    "id": 10,
+    "original": "Edmond梁，身高185cm，居住於香港觀塘 AIA Tower 31樓，Bank Account = 274542182882現任Alibaba CEO，電話為 21678080，身份證號為 R98272829。",
+    "masked": "[NAME-01]，身高185cm，居住於[ADDRESS-01]樓，Bank Account =[ACCOUNT-01]4542182882現任[ORG-01] CEO，電話為[PHONE-01]78080，身份證號為[ID-01]982728[ID-02]。",
+    "entities": [
+      {
+        "entity_group": "NAME",
+        "score": 0.9988483786582947,
+        "word": "Edmond梁",
+        "start": 0,
+        "end": 7,
+        "numbered_tag": "NAME-01"
+      },
+      {
+        "entity_group": "ADDRESS",
+        "score": 0.7828264236450195,
+        "word": "香港觀塘 AIA Tower 31",
+        "start": 19,
+        "end": 36,
+        "numbered_tag": "ADDRESS-01"
+      },
+      {
+        "entity_group": "ACCOUNT",
+        "score": 0.459736168384552,
+        "word": "27",
+        "start": 52,
+        "end": 55,
+        "numbered_tag": "ACCOUNT-01"
+      },
+      {
+        "entity_group": "ORG",
+        "score": 0.7421196699142456,
+        "word": "Alibaba",
+        "start": 67,
+        "end": 74,
+        "numbered_tag": "ORG-01"
+      },
+      {
+        "entity_group": "PHONE",
+        "score": 0.8287659287452698,
+        "word": "216",
+        "start": 82,
+        "end": 86,
+        "numbered_tag": "PHONE-01"
+      },
+      {
+        "entity_group": "ID",
+        "score": 0.7247365713119507,
+        "word": "R",
+        "start": 97,
+        "end": 99,
+        "numbered_tag": "ID-01"
+      },
+      {
+        "entity_group": "ID",
+        "score": 0.4979495704174042,
+        "word": "29",
+        "start": 105,
+        "end": 107,
+        "numbered_tag": "ID-02"
+      }
+    ]
+  },
+  {
+    "id": 11,
+    "original": "Hey, my name is Alex Chan. I just moved to 12A Nathan Road in Kowloon last week. If you need to reach me, my phone number is 91234567. By the way, my Hong Kong ID is R123456(7), and my bank account number is 1234567890. I’m working at TechCorp Limited now, so most emails will come from that domain. Oh, and my car license plate is AB1234, registered under TechCorp Limited. Let me know if you need any more details.",
+    "masked": "Hey, my name is[NAME-01]. I just moved to[ADDRESS-01] in[ADDRESS-02][NAME-02][ADDRESS-03] last week. If you need to reach me, my phone number is[PHONE-01]1234567. By the way, my[ADDRESS-04] ID is R123456([ID-01], and my bank account number is [ACCOUNT-01]. I’m working at[ORG-01] now, so most emails will come from that domain. Oh, and my car license plate is AB1234, registered under[ORG-01]. Let me know if you need any more details.",
+    "entities": [
+      {
+        "entity_group": "NAME",
+        "score": 0.9996706247329712,
+        "word": "Alex Chan",
+        "start": 15,
+        "end": 25,
+        "numbered_tag": "NAME-01"
+      },
+      {
+        "entity_group": "ADDRESS",
+        "score": 0.6200659871101379,
+        "word": "12A Nathan Road",
+        "start": 42,
+        "end": 58,
+        "numbered_tag": "ADDRESS-01"
+      },
+      {
+        "entity_group": "ADDRESS",
+        "score": 0.9334961175918579,
+        "word": "Ko",
+        "start": 61,
+        "end": 64,
+        "numbered_tag": "ADDRESS-02"
+      },
+      {
+        "entity_group": "NAME",
+        "score": 0.6415101289749146,
+        "word": "w",
+        "start": 64,
+        "end": 65,
+        "numbered_tag": "NAME-02"
+      },
+      {
+        "entity_group": "ADDRESS",
+        "score": 0.5413995981216431,
+        "word": "loon",
+        "start": 65,
+        "end": 69,
+        "numbered_tag": "ADDRESS-03"
+      },
+      {
+        "entity_group": "PHONE",
+        "score": 0.7821409106254578,
+        "word": "9",
+        "start": 124,
+        "end": 126,
+        "numbered_tag": "PHONE-01"
+      },
+      {
+        "entity_group": "ADDRESS",
+        "score": 0.8267659544944763,
+        "word": "Hong Kong",
+        "start": 149,
+        "end": 159,
+        "numbered_tag": "ADDRESS-04"
+      },
+      {
+        "entity_group": "ID",
+        "score": 0.48544201254844666,
+        "word": "7",
+        "start": 174,
+        "end": 176,
+        "numbered_tag": "ID-01"
+      },
+      {
+        "entity_group": "ACCOUNT",
+        "word": "1234567890",
+        "start": 208,
+        "end": 218,
+        "score": 1.0,
+        "numbered_tag": "ACCOUNT-01"
+      },
+      {
+        "entity_group": "ORG",
+        "score": 0.8219992518424988,
+        "word": "TechCorp Limited",
+        "start": 234,
+        "end": 251,
+        "numbered_tag": "ORG-01"
+      },
+      {
+        "entity_group": "ORG",
+        "score": 0.8443373441696167,
+        "word": "TechCorp Limited",
+        "start": 356,
+        "end": 373,
+        "numbered_tag": "ORG-01"
+      }
+    ]
+  },
+  {
+    "id": 12,
+    "original": "【明報專訊】陝西西安至延安高速鐵路（西延高鐵）昨（26日）正式開通運營，運行時間從此前動車的2.5小時縮短至1小時左右，革命老區延安邁入「高鐵時代」的同時，全國高鐵運營里程也突破5萬公里，超過世界上其他國家高鐵運營里程的總和。國家發展改革委綜合運輸研究所交通管理與政策研究室主任李玉濤表示，中國是是世界上高速鐵路運營里程最長、在建規模最大、商業運營速度最高、高鐵技術最全面、運營場景最豐富的國家。\n\n料延安每年吸客5000萬\n西延高鐵首班列車C9309次「復興號」智能動車組昨上午10時從延安站出發。西延高鐵線路全長299公里，設計時速350公里，是目前穿越黃土高原設計時速最高的鐵路，也是「八縱八橫」高鐵網包頭、銀川至海口的包（銀）海通道的重要組成部分。新華社報道，延安市經濟合作局副局長席建勇表示，西延高鐵預計帶動延安每年接待遊客突破5000萬人次，幫助蘋果、小米等土特產走出去，讓「科研在西安、生產在延安」有望成為現實。\n\n西延高鐵2021年5月開工建設，線路經過渭河冲積平原區、黃土台塬區、子午嶺低中山區、黃土溝壑梁峁區4種地貌單元，橋樑、隧道佔線路長度的91%，設計、施工難度大。建設者創新採用「腰樑式臨時支撐」等技術，給黃土淺埋隧道「繫上一條堅固的腰帶」，避免隧道變形、坍塌。全線軌道質量指數平均值達到1.33毫米，處於國內高鐵領先水平。\n\n杭衢高鐵通車 全程73分鐘\n連接浙江省會杭州和浙江西部城市衢州的高速鐵路（杭衢高鐵）也在昨天正式開通，兩地間車程縮短至73分鐘。杭衢高鐵全線長度131公里，設計時速350公里，與既有的滬昆高鐵杭州至衢州段形成雙通道。中國國家鐵路集團（簡稱國鐵）上海局運輸部高級工程師郭建斌表示，杭衢高鐵是長三角城際快速交通網的重要組成部分，杭衢高鐵在建德站與杭州至黃山高鐵接軌，接入杭州樞紐；在衢州西站與九景衢鐵路連接，向西通達湖北武漢、江西九江等地；江山站可與滬昆高鐵實現換乘。\n\n較「十三五」多128縣通高鐵\n「十四五」規劃期間全國建成投產高鐵1.2萬公里。目前全國高鐵營業里程突破5萬公里，較2020年底增長約32%，陝西富平、湖北巴東、廣西龍州等128個縣進入「高鐵時代」。目前，高鐵覆蓋了中國97%的城區人口50萬以上城市，營業里程位居世界第一，超過世界上其他國家高鐵營業里程的總和。\n\n高鐵密集開通的同時，高鐵項目繼續承擔巨大債務。截至2024年末，國鐵集團總負債規模達6.2萬億元（人民幣，下同），負債率63.52%。國鐵集團去年總收入1.25萬億元、凈利潤33.04億元均新高，但縱觀全國，僅有京滬、京津、滬杭、滬寧、寧杭、廣深港高鐵等少數位於經濟發達、人流密集地區的線路盈利，合計里程約佔全國高鐵5%。\n\n原文網址：https://news.mingpao.com/pns/%E4%B8%AD%E5%9C%8B/article/20251227/s00013/1766768409494",
+    "masked": "【明報專訊】[ADDRESS-01]至[ADDRESS-02]鐵路（西[ADDRESS-03]高鐵）昨（26日）正式開通運營，運行時間從此前動車的2.5小時縮短至1小時左右，革命老區[ADDRESS-04]邁入「高鐵時代」的同時，全國高鐵運營里程也突破5萬公里，超過世界上其他國家高鐵運營里程的總和。[ORG-01]室主任[NAME-01]表示，[ADDRESS-05]是是世界上高速鐵路運營里程最長、在建規模最大、商業運營速度最高、高鐵技術最全面、運營場景最豐富的國家。\n\n料[ADDRESS-04]每年吸客5000萬\n[ADDRESS-06]高鐵首班列車C9309次「復興號」智能動車組昨上午10時從[ADDRESS-07]出發。[ADDRESS-06]高鐵線路全長299公里，設計時速350公里，是目前穿越黃土高原設計時速最高的鐵路，也是「[ADDRESS-08]」高鐵網[ADDRESS-09]、[ADDRESS-10]至[ADDRESS-11]的[ADDRESS-12]的重要組成部分。[ORG-02]社報道，[ORG-03]副局長[NAME-02]表示，西[ADDRESS-03]高鐵預計帶動[ADDRESS-04]每年接待遊客突破5000萬人次，幫助蘋果、小米等土特產走出去，讓「科研在[ADDRESS-13]、生產在[ADDRESS-04]」有望成為現實。\n\n西[ADDRESS-14]2021年5月開工建設，線路經過[ADDRESS-15]區、[ADDRESS-16]、[ADDRESS-17]、黃[ADDRESS-18]4種地貌單元，橋樑、隧道佔線路長度的91%，設計、施工難度大。建設者創新採用「腰樑式臨時支撐」等技術，給黃土淺埋隧道「繫上一條堅固的腰帶」，避免隧道變形、坍塌。全線軌道質量指數平均值達到1.33毫米，處於國內高鐵領先水平。\n[ADDRESS-19]高鐵通車 全程73分鐘\n連接[ORG-04]會[ADDRESS-20]和[ADDRESS-21]西部城市[ADDRESS-22]的高速鐵路（[ORG-05][ADDRESS-23]高鐵）也在昨天正式開通，兩地間車程縮短至73分鐘。杭[ADDRESS-23]高鐵全線長度131公里，設計時速350公里，與既有的滬[ADDRESS-24]高鐵[ADDRESS-20]至[ADDRESS-22]段形成雙通道。[ORG-06]集團（簡稱[ORG-07]）[ORG-08]局運輸部高級工程師[NAME-03]表示，杭衢高鐵是長三角城際快速交通網的重要組成部分，杭衢高鐵在建德站與杭州至黃山高鐵接軌，接入杭州樞紐；在衢州西站與九景衢鐵路連接，向西通達湖北武漢、江西九江等地；江山站可與滬昆高鐵實現換乘。\n\n較「十三五」多128縣通高鐵\n「十四五」規劃期間全國建成投產高鐵1.2萬公里。目前全國高鐵營業里程突破5萬公里，較2020年底增長約32%，陝西富平、湖北巴東、廣西龍州等128個縣進入「高鐵時代」。目前，高鐵覆蓋了中國97%的城區人口50萬以上城市，營業里程位居世界第一，超過世界上其他國家高鐵營業里程的總和。\n\n高鐵密集開通的同時，高鐵項目繼續承擔巨大債務。截至2024年末，國鐵集團總負債規模達6.2萬億元（人民幣，下同），負債率63.52%。國鐵集團去年總收入1.25萬億元、凈利潤33.04億元均新高，但縱觀全國，僅有京滬、京津、滬杭、滬寧、寧杭、廣深港高鐵等少數位於經濟發達、人流密集地區的線路盈利，合計里程約佔全國高鐵5%。\n\n原文網址：https://news.mingpao.com/pns/%E4%B8%AD%E5%9C%8B/article/[PHONE-01]/s00013/1766768409494",
+    "entities": [
+      {
+        "entity_group": "ADDRESS",
+        "score": 0.9166410565376282,
+        "word": "陝西西安",
+        "start": 6,
+        "end": 10,
+        "numbered_tag": "ADDRESS-01"
+      },
+      {
+        "entity_group": "ADDRESS",
+        "score": 0.6188307404518127,
+        "word": "延安高速",
+        "start": 11,
+        "end": 15,
+        "numbered_tag": "ADDRESS-02"
+      },
+      {
+        "entity_group": "ADDRESS",
+        "score": 0.7411619424819946,
+        "word": "延",
+        "start": 19,
+        "end": 20,
+        "numbered_tag": "ADDRESS-03"
+      },
+      {
+        "entity_group": "ADDRESS",
+        "score": 0.8552600145339966,
+        "word": "延安",
+        "start": 64,
+        "end": 66,
+        "numbered_tag": "ADDRESS-04"
+      },
+      {
+        "entity_group": "ORG",
+        "score": 0.7705488204956055,
+        "word": "國家發展改革委綜合運輸研究所交通管理與政策研究",
+        "start": 113,
+        "end": 136,
+        "numbered_tag": "ORG-01"
+      },
+      {
+        "entity_group": "NAME",
+        "score": 0.9996998310089111,
+        "word": "李玉濤",
+        "start": 139,
+        "end": 142,
+        "numbered_tag": "NAME-01"
+      },
+      {
+        "entity_group": "ADDRESS",
+        "score": 0.946068525314331,
+        "word": "中國",
+        "start": 145,
+        "end": 147,
+        "numbered_tag": "ADDRESS-05"
+      },
+      {
+        "entity_group": "ADDRESS",
+        "score": 0.910047173500061,
+        "word": "延安",
+        "start": 201,
+        "end": 203,
+        "numbered_tag": "ADDRESS-04"
+      },
+      {
+        "entity_group": "ADDRESS",
+        "score": 0.4819298982620239,
+        "word": "西延",
+        "start": 213,
+        "end": 215,
+        "numbered_tag": "ADDRESS-06"
+      },
+      {
+        "entity_group": "ADDRESS",
+        "score": 0.857387363910675,
+        "word": "延安站",
+        "start": 244,
+        "end": 247,
+        "numbered_tag": "ADDRESS-07"
+      },
+      {
+        "entity_group": "ADDRESS",
+        "score": 0.6077219247817993,
+        "word": "西延",
+        "start": 250,
+        "end": 252,
+        "numbered_tag": "ADDRESS-06"
+      },
+      {
+        "entity_group": "ADDRESS",
+        "score": 0.5375295281410217,
+        "word": "八縱八橫",
+        "start": 296,
+        "end": 300,
+        "numbered_tag": "ADDRESS-08"
+      },
+      {
+        "entity_group": "ADDRESS",
+        "score": 0.845223069190979,
+        "word": "包頭",
+        "start": 304,
+        "end": 306,
+        "numbered_tag": "ADDRESS-09"
+      },
+      {
+        "entity_group": "ADDRESS",
+        "score": 0.842749297618866,
+        "word": "銀川",
+        "start": 307,
+        "end": 309,
+        "numbered_tag": "ADDRESS-10"
+      },
+      {
+        "entity_group": "ADDRESS",
+        "score": 0.9025850892066956,
+        "word": "海口",
+        "start": 310,
+        "end": 312,
+        "numbered_tag": "ADDRESS-11"
+      },
+      {
+        "entity_group": "ADDRESS",
+        "score": 0.8852627873420715,
+        "word": "包(銀)海通道",
+        "start": 313,
+        "end": 320,
+        "numbered_tag": "ADDRESS-12"
+      },
+      {
+        "entity_group": "ORG",
+        "score": 0.7189881801605225,
+        "word": "新華",
+        "start": 328,
+        "end": 330,
+        "numbered_tag": "ORG-02"
+      },
+      {
+        "entity_group": "ORG",
+        "score": 0.8411803245544434,
+        "word": "延安市經濟合作局",
+        "start": 334,
+        "end": 342,
+        "numbered_tag": "ORG-03"
+      },
+      {
+        "entity_group": "NAME",
+        "score": 0.9996699690818787,
+        "word": "席建勇",
+        "start": 345,
+        "end": 348,
+        "numbered_tag": "NAME-02"
+      },
+      {
+        "entity_group": "ADDRESS",
+        "score": 0.7903773784637451,
+        "word": "延",
+        "start": 352,
+        "end": 353,
+        "numbered_tag": "ADDRESS-03"
+      },
+      {
+        "entity_group": "ADDRESS",
+        "score": 0.8754507899284363,
+        "word": "延安",
+        "start": 359,
+        "end": 361,
+        "numbered_tag": "ADDRESS-04"
+      },
+      {
+        "entity_group": "ADDRESS",
+        "score": 0.9143926501274109,
+        "word": "西安",
+        "start": 397,
+        "end": 399,
+        "numbered_tag": "ADDRESS-13"
+      },
+      {
+        "entity_group": "ADDRESS",
+        "score": 0.9233338832855225,
+        "word": "延安",
+        "start": 403,
+        "end": 405,
+        "numbered_tag": "ADDRESS-04"
+      },
+      {
+        "entity_group": "ADDRESS",
+        "score": 0.6463291049003601,
+        "word": "延高鐵",
+        "start": 416,
+        "end": 419,
+        "numbered_tag": "ADDRESS-14"
+      },
+      {
+        "entity_group": "ADDRESS",
+        "score": 0.811152458190918,
+        "word": "渭河冲積平原",
+        "start": 435,
+        "end": 441,
+        "numbered_tag": "ADDRESS-15"
+      },
+      {
+        "entity_group": "ADDRESS",
+        "score": 0.7302451133728027,
+        "word": "黃土台塬區",
+        "start": 443,
+        "end": 448,
+        "numbered_tag": "ADDRESS-16"
+      },
+      {
+        "entity_group": "ADDRESS",
+        "score": 0.8304616808891296,
+        "word": "子午嶺低中山區",
+        "start": 449,
+        "end": 456,
+        "numbered_tag": "ADDRESS-17"
+      },
+      {
+        "entity_group": "ADDRESS",
+        "score": 0.762451171875,
+        "word": "土溝壑梁峁區",
+        "start": 458,
+        "end": 464,
+        "numbered_tag": "ADDRESS-18"
+      },
+      {
+        "entity_group": "ADDRESS",
+        "score": 0.691267728805542,
+        "word": "杭衢",
+        "start": 576,
+        "end": 579,
+        "numbered_tag": "ADDRESS-19"
+      },
+      {
+        "entity_group": "ORG",
+        "score": 0.6500449776649475,
+        "word": "浙江省",
+        "start": 593,
+        "end": 596,
+        "numbered_tag": "ORG-04"
+      },
+      {
+        "entity_group": "ADDRESS",
+        "score": 0.6714282035827637,
+        "word": "杭州",
+        "start": 597,
+        "end": 599,
+        "numbered_tag": "ADDRESS-20"
+      },
+      {
+        "entity_group": "ADDRESS",
+        "score": 0.5165678858757019,
+        "word": "浙江",
+        "start": 600,
+        "end": 602,
+        "numbered_tag": "ADDRESS-21"
+      },
+      {
+        "entity_group": "ADDRESS",
+        "score": 0.7590436935424805,
+        "word": "衢州",
+        "start": 606,
+        "end": 608,
+        "numbered_tag": "ADDRESS-22"
+      },
+      {
+        "entity_group": "ORG",
+        "score": 0.5394192934036255,
+        "word": "杭",
+        "start": 614,
+        "end": 615,
+        "numbered_tag": "ORG-05"
+      },
+      {
+        "entity_group": "ADDRESS",
+        "score": 0.5467702150344849,
+        "word": "衢",
+        "start": 615,
+        "end": 616,
+        "numbered_tag": "ADDRESS-23"
+      },
+      {
+        "entity_group": "ADDRESS",
+        "score": 0.8093229532241821,
+        "word": "衢",
+        "start": 642,
+        "end": 643,
+        "numbered_tag": "ADDRESS-23"
+      },
+      {
+        "entity_group": "ADDRESS",
+        "score": 0.7846155166625977,
+        "word": "昆",
+        "start": 670,
+        "end": 671,
+        "numbered_tag": "ADDRESS-24"
+      },
+      {
+        "entity_group": "ADDRESS",
+        "score": 0.8742924928665161,
+        "word": "杭州",
+        "start": 673,
+        "end": 675,
+        "numbered_tag": "ADDRESS-20"
+      },
+      {
+        "entity_group": "ADDRESS",
+        "score": 0.8934156894683838,
+        "word": "衢州",
+        "start": 676,
+        "end": 678,
+        "numbered_tag": "ADDRESS-22"
+      },
+      {
+        "entity_group": "ORG",
+        "score": 0.7604268193244934,
+        "word": "中國國家鐵路",
+        "start": 685,
+        "end": 691,
+        "numbered_tag": "ORG-06"
+      },
+      {
+        "entity_group": "ORG",
+        "score": 0.7746723890304565,
+        "word": "國鐵",
+        "start": 696,
+        "end": 698,
+        "numbered_tag": "ORG-07"
+      },
+      {
+        "entity_group": "ORG",
+        "score": 0.5083970427513123,
+        "word": "上海",
+        "start": 699,
+        "end": 701,
+        "numbered_tag": "ORG-08"
+      },
+      {
+        "entity_group": "NAME",
+        "score": 0.9996671080589294,
+        "word": "郭建斌",
+        "start": 710,
+        "end": 713,
+        "numbered_tag": "NAME-03"
+      },
+      {
+        "entity_group": "PHONE",
+        "word": "20251227",
+        "start": 1192,
+        "end": 1200,
+        "score": 1.0,
+        "numbered_tag": "PHONE-01"
+      }
+    ]
+  },
+  {
+    "id": 13,
+    "original": "這本《馬斯克傳》的作者是大名鼎鼎的華特．艾薩克森（Walter Isaacson），他最知名的作品之就是《賈伯斯傳》，他的寫作總是包含了深入且全面的研究，他的傳記作品往往融合了詳盡的事實調查和深刻的人物洞察。而且，他還能夠將複雜的科學技術和商業策略，以及被傳記對象的人生故事和性格特點，呈現得既精確又富有敘事張力。\n\n為了寫這本書，艾薩克森獲得了伊隆．馬斯克（Elon Musk）的同意，貼身採訪他整整兩年，書中包含了跟馬斯克本人多次的深入面談，以及與他的家人、朋友、同事以及商業競爭對手的訪談。除了平常媒體報導的故事之外，書中有太多「第一手」的內幕消息，是其他地方絕對讀不到的。而馬斯克本人沒有「審查」過這本書，而是直接放手這本書出版，讓本書的所有內容保留在最原始且真實的狀態。\n\n舉例來說，這本書的真實性有多誇張呢，就有一位網友在讀完這本書之後，針對其中一個段落，到 Twitter 上面留言，竟然引來了馬斯克本人的回應。\n\n事情是這樣的，書本裡面有描述到一段，好萊塢女星安柏．赫德（Amber Heard）為了討馬斯克開心，特地 Cosplay 變身成為電動遊戲《鬥陣特攻》裡面的一個電玩角色叫做「慈悲」，但是書本裡面並沒有附上照片，網友就在 Twitter 貼文問：「這件事情是真的嗎？」結果馬斯克本人竟然自己轉推了安柏赫德 Cosplay 的那張原始照片，。因為我自己也有玩這款遊戲，所以看到那個照片的時候簡直是下巴都掉下來，因為 Cosplay 還原度真的太高了！超級像！\n\n所以書本裡面就有很多這種第一手的內幕消息，包含馬斯克自己透漏的，還有其他親友或員工偷偷爆料的事情。而且馬斯克在心情不好的時候，他還會在深夜傳訊息給作者艾薩克森訴苦，讓我們看到曾經的世界首富心裡面究竟經歷了哪些掙扎。",
+    "masked": "這本《[NAME-01]傳》的作者是大名鼎鼎的[NAME-02]（[NAME-03]），他最知名的作品之就是《[NAME-04]傳》，他的寫作總是包含了深入且全面的研究，他的傳記作品往往融合了詳盡的事實調查和深刻的人物洞察。而且，他還能夠將複雜的科學技術和商業策略，以及被傳記對象的人生故事和性格特點，呈現得既精確又富有敘事張力。\n\n為了寫這本書，[NAME-05]獲得了[NAME-06]（[NAME-07]）的同意，貼身採訪他整整兩年，書中包含了跟[NAME-01]本人多次的深入面談，以及與他的家人、朋友、同事以及商業競爭對手的訪談。除了平常媒體報導的故事之外，書中有太多「第一手」的內幕消息，是其他地方絕對讀不到的。而[NAME-01]本人沒有「審查」過這本書，而是直接放手這本書出版，讓本書的所有內容保留在最原始且真實的狀態。\n\n舉例來說，這本書的真實性有多誇張呢，就有一位網友在讀完這本書之後，針對其中一個段落，到[ORG-01] 上面留言，竟然引來了[NAME-01]本人的回應。\n\n事情是這樣的，書本裡面有描述到一段，[ORG-02]萊塢女星[NAME-08]（[NAME-09]）為了討[NAME-01]開心，特地 Cosplay 變身成為電動遊戲《鬥陣特攻》裡面的一個電玩角色叫做「[NAME-10]」，但是書本裡面並沒有附上照片，網友就在 Twitter 貼文問：「這件事情是真的嗎？」結果[NAME-01]本人竟然自己轉推了[NAME-11] Cosplay 的那張原始照片，。因為我自己也有玩這款遊戲，所以看到那個照片的時候簡直是下巴都掉下來，因為 Cosplay 還原度真的太高了！超級像！\n\n所以書本裡面就有很多這種第一手的內幕消息，包含[NAME-01]自己透漏的，還有其他親友或員工偷偷爆料的事情。而且[NAME-01]在心情不好的時候，他還會在深夜傳訊息給作者[NAME-05]訴苦，讓我們看到曾經的世界首富心裡面究竟經歷了哪些掙扎。",
+    "entities": [
+      {
+        "entity_group": "NAME",
+        "score": 0.9937167763710022,
+        "word": "馬斯克",
+        "start": 3,
+        "end": 6,
+        "numbered_tag": "NAME-01"
+      },
+      {
+        "entity_group": "NAME",
+        "score": 0.998692512512207,
+        "word": "華特.艾薩克森",
+        "start": 17,
+        "end": 24,
+        "numbered_tag": "NAME-02"
+      },
+      {
+        "entity_group": "NAME",
+        "score": 0.9973587989807129,
+        "word": "Walter Isaacson",
+        "start": 25,
+        "end": 40,
+        "numbered_tag": "NAME-03"
+      },
+      {
+        "entity_group": "NAME",
+        "score": 0.9907072186470032,
+        "word": "賈伯斯",
+        "start": 53,
+        "end": 56,
+        "numbered_tag": "NAME-04"
+      },
+      {
+        "entity_group": "NAME",
+        "score": 0.9989016652107239,
+        "word": "艾薩克森",
+        "start": 166,
+        "end": 170,
+        "numbered_tag": "NAME-05"
+      },
+      {
+        "entity_group": "NAME",
+        "score": 0.9993517398834229,
+        "word": "伊隆.馬斯克",
+        "start": 173,
+        "end": 179,
+        "numbered_tag": "NAME-06"
+      },
+      {
+        "entity_group": "NAME",
+        "score": 0.9991685748100281,
+        "word": "Elon Musk",
+        "start": 180,
+        "end": 189,
+        "numbered_tag": "NAME-07"
+      },
+      {
+        "entity_group": "NAME",
+        "score": 0.9992351531982422,
+        "word": "馬斯克",
+        "start": 210,
+        "end": 213,
+        "numbered_tag": "NAME-01"
+      },
+      {
+        "entity_group": "NAME",
+        "score": 0.999340832233429,
+        "word": "馬斯克",
+        "start": 291,
+        "end": 294,
+        "numbered_tag": "NAME-01"
+      },
+      {
+        "entity_group": "ORG",
+        "score": 0.6714301109313965,
+        "word": "Twitter",
+        "start": 385,
+        "end": 393,
+        "numbered_tag": "ORG-01"
+      },
+      {
+        "entity_group": "NAME",
+        "score": 0.9994979500770569,
+        "word": "馬斯克",
+        "start": 404,
+        "end": 407,
+        "numbered_tag": "NAME-01"
+      },
+      {
+        "entity_group": "ORG",
+        "score": 0.5251919031143188,
+        "word": "好",
+        "start": 433,
+        "end": 434,
+        "numbered_tag": "ORG-02"
+      },
+      {
+        "entity_group": "NAME",
+        "score": 0.9994123578071594,
+        "word": "安柏.赫德",
+        "start": 438,
+        "end": 443,
+        "numbered_tag": "NAME-08"
+      },
+      {
+        "entity_group": "NAME",
+        "score": 0.9988194704055786,
+        "word": "Amber Heard",
+        "start": 444,
+        "end": 455,
+        "numbered_tag": "NAME-09"
+      },
+      {
+        "entity_group": "NAME",
+        "score": 0.9991939663887024,
+        "word": "馬斯克",
+        "start": 459,
+        "end": 462,
+        "numbered_tag": "NAME-01"
+      },
+      {
+        "entity_group": "NAME",
+        "score": 0.9788908958435059,
+        "word": "慈悲",
+        "start": 502,
+        "end": 504,
+        "numbered_tag": "NAME-10"
+      },
+      {
+        "entity_group": "NAME",
+        "score": 0.998408317565918,
+        "word": "馬斯克",
+        "start": 550,
+        "end": 553,
+        "numbered_tag": "NAME-01"
+      },
+      {
+        "entity_group": "NAME",
+        "score": 0.9987419843673706,
+        "word": "安柏赫德",
+        "start": 562,
+        "end": 566,
+        "numbered_tag": "NAME-11"
+      },
+      {
+        "entity_group": "NAME",
+        "score": 0.9992372393608093,
+        "word": "馬斯克",
+        "start": 667,
+        "end": 670,
+        "numbered_tag": "NAME-01"
+      },
+      {
+        "entity_group": "NAME",
+        "score": 0.9988722205162048,
+        "word": "馬斯克",
+        "start": 695,
+        "end": 698,
+        "numbered_tag": "NAME-01"
+      },
+      {
+        "entity_group": "NAME",
+        "score": 0.999122679233551,
+        "word": "艾薩克森",
+        "start": 719,
+        "end": 723,
+        "numbered_tag": "NAME-05"
+      }
+    ]
+  },
+  {
+    "id": 14,
+    "original": "本身班人都唔知有醫療豁免，而且舊制門檻高 而家加完價驚俾人屌就擴大醫療豁免，賣幾個月廣告驚死人唔知有得免費睇醫生咁 結果係 1. 本身俾緊幾十蚊嘅都去申請唔使俾，本身果少少錢都收唔返 2. 本身覺得A&E貴唔去嘅，拎完醫療豁免係唔係都去，反正免費，等得耐再屌你 3. 拎住醫療豁免，講真唔使錢生雞眼都去拎藥啦，仲落街俾錢買雞眼貼？總之係唔係都去睇，book唔到再屌你 諗呢條屎忽橋出黎嘅辭切腹自盡啦#haha#dog 定其實係水鏡八奇兵法，想整冧成個醫療，再用晒支那醫生同藥？",
+    "masked": "本身班人都唔知有醫療豁免，而且舊制門檻高 而家加完價驚俾人屌就擴大醫療豁免，賣幾個月廣告驚死人唔知有得免費睇醫生咁 結果係 1. 本身俾緊幾十蚊嘅都去申請唔使俾，本身果少少錢都收唔返 2. 本身覺得A&E貴唔去嘅，拎完醫療豁免係唔係都去，反正免費，等得耐再屌你 3. 拎住醫療豁免，講真唔使錢生雞眼都去拎藥啦，仲落街俾錢買雞眼貼？總之係唔係都去睇，book唔到再屌你 諗呢條屎忽橋出黎嘅辭切腹自盡啦#haha#dog 定其實係水鏡八奇兵法，想整冧成個醫療，再用晒支那醫生同藥？",
+    "entities": []
+  },
+  {
+    "id": 15,
+    "original": "給那些尚未付費的人看的 這app沒付費就無法接收邀請，只能送邀請 但有機會在配對碰到給你邀請的人，如果也送邀請給對方才能配對成功 目前碰到配對成功講中文的女性，目前是沒碰到詐騙但都有在做實況，自己當心 還有就是目前配對到的對象幾乎沒聊幾句就會跟你要line這點，且line加完後就會解除配對，讓你想檢舉都無法檢舉，如今連截圖也無法截圖，更無法很好的保存證據做檢舉，自行注意 2星給免費的社群，有機會看到國外很辣的照片 1星給是真的有機會配對到人，但是不是真人就不好說了 再扣一星給開發組，收了錢但卻無法有效的控管人員，感覺只把錢付在了主機的費用上",
+    "masked": "給那些尚未付費的人看的 這app沒付費就無法接收邀請，只能送邀請 但有機會在配對碰到給你邀請的人，如果也送邀請給對方才能配對成功 目前碰到配對成功講中文的女性，目前是沒碰到詐騙但都有在做實況，自己當心 還有就是目前配對到的對象幾乎沒聊幾句就會跟你要line這點，且line加完後就會解除配對，讓你想檢舉都無法檢舉，如今連截圖也無法截圖，更無法很好的保存證據做檢舉，自行注意 2星給免費的社群，有機會看到國外很辣的照片 1星給是真的有機會配對到人，但是不是真人就不好說了 再扣一星給開發組，收了錢但卻無法有效的控管人員，感覺只把錢付在了主機的費用上",
+    "entities": []
+  },
+  {
+    "id": 16,
+    "original": "微軟早就不管的老軟體，其實還有人在默默守護。最近一個名為 Legacy Update 的網站引發關注，它把被官方下架的 Office Viewers、舊版 DirectX、早期 .NET Framework 等工具重新整理成「微軟下載中心檔案館」，讓還在跑 Windows XP、Windows 7 的老電腦，終於有地方可找資源。\n這個檔案館裡不只是「能裝就好」，而是完整保存了一整個時代的 Windows 生態：像是 XP 時期的 PowerToys、SyncToy、RAW 圖檔預覽工具，甚至連老遊戲必備的 DirectX Runtime、早已消失的 XPS Essentials Pack，都能找到來源清楚的下載版本。部分檔案還是透過 Internet Archive 的 Wayback Machine 搶救回來，對維修老機、跑舊系統或做數位保存的人來說，價值不只是「懷舊」。\n不過也要說清楚，這些軟體與作業系統早已停止安全更新，能用不代表安全，更多是「保存與研究價值」。有趣的是，Legacy Update 本身其實是為了讓 XP、7 重新連上 Windows Update 而誕生，如今反而成了數位考古級的資料庫；站長 Adam Demasi 也持續透過社群贊助維護，替一整段被官方翻頁的 Windows 歷史留一條後路。\nhttps://www.techbang.com/posts/126974",
+    "masked": "[ORG-01]早就不管的老軟體，其實還有人在默默守護。最近一個名為 Legacy Update 的網站引發關注，它把被官方下架的 Office Viewers、舊版 DirectX、早期 .NET Framework 等工具重新整理成「[ORG-01]下載中心檔案館」，讓還在跑 Windows XP、Windows 7 的老電腦，終於有地方可找資源。\n這個檔案館裡不只是「能裝就好」，而是完整保存了一整個時代的 Windows 生態：像是 XP 時期的 PowerToys、SyncToy、RAW 圖檔預覽工具，甚至連老遊戲必備的 DirectX Runtime、早已消失的 XPS Essentials Pack，都能找到來源清楚的下載版本。部分檔案還是透過[ORG-02] 的 Wayback Machine 搶救回來，對維修老機、跑舊系統或做數位保存的人來說，價值不只是「懷舊」。\n不過也要說清楚，這些軟體與作業系統早已停止安全更新，能用不代表安全，更多是「保存與研究價值」。有趣的是，Legacy Update 本身其實是為了讓 XP、7 重新連上 Windows Update 而誕生，如今反而成了數位考古級的資料庫；站長[NAME-01] 也持續透過社群贊助維護，替一整段被官方翻頁的 Windows 歷史留一條後路。\nhttps://www.techbang.com/posts/126974",
+    "entities": [
+      {
+        "entity_group": "ORG",
+        "score": 0.7498535513877869,
+        "word": "微軟",
+        "start": 0,
+        "end": 2,
+        "numbered_tag": "ORG-01"
+      },
+      {
+        "entity_group": "ORG",
+        "score": 0.9257656335830688,
+        "word": "微軟",
+        "start": 113,
+        "end": 115,
+        "numbered_tag": "ORG-01"
+      },
+      {
+        "entity_group": "ORG",
+        "score": 0.7212572693824768,
+        "word": "Internet Archive",
+        "start": 320,
+        "end": 337,
+        "numbered_tag": "ORG-02"
+      },
+      {
+        "entity_group": "NAME",
+        "score": 0.9992888569831848,
+        "word": "Adam Demasi",
+        "start": 515,
+        "end": 527,
+        "numbered_tag": "NAME-01"
+      }
+    ]
+  },
+  {
+    "id": 17,
+    "original": "委任關鍵基礎設施（電腦系統安全）專員（附圖）\n＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊\n　　​政府今日（一月一日）宣布，經公開招聘後，委任陳永安為關鍵基礎設施（電腦系統安全）專員，任期今日起生效，為期三年。行政長官根據《保護關鍵基礎設施（電腦系統）條例》（第653章）（《條例》）作出這項委任。\n \n　　政府發言人表示：「陳先生具備卓越的網絡安全專業能力、國際視野、執法經驗及策略管理能力，並具有優秀的領導、管理及溝通技巧。他將領導隸屬保安局的專責辦公室，維護香港關鍵基礎設施的電腦系統安全。」\n \n　　陳永安是香港警務處前網絡安全及科技罪案調查科總警司，曾擔任國際刑警網絡罪案專家組主席，於二○二○年從警隊退休後曾於私人企業擔任電腦系統及網絡安全相關主管，並於二○二四年五月起出任保安局助理總監（關鍵基礎設施）。\n \n　　《條例》今日正式生效，提供完備法定制度保障香港關鍵基礎設施的電腦系統安全、規管關鍵基礎設施的營運者，以及調查和應對相關的電腦系統安全威脅及事故。關鍵基礎設施（電腦系統安全）專員將帶領在同日成立的專責辦公室，負責落實和執行《條例》的法定制度，包括指定「關鍵基礎設施營運者」及「關鍵電腦系統」，並監察其遵從法定責任的情況。 \n \n完",
+    "masked": "委任關鍵基礎設施（電腦系統安全）專員（附圖）\n＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊＊\n　　​政府今日（一月一日）宣布，經公開招聘後，委任[NAME-01]為關鍵基礎設施（電腦系統安全）專員，任期今日起生效，為期三年。行政長官根據《保護關鍵基礎設施（電腦系統）條例》（第653章）（《條例》）作出這項委任。\n \n　　政府發言人表示：「[NAME-02]先生具備卓越的網絡安全專業能力、國際視野、執法經驗及策略管理能力，並具有優秀的領導、管理及溝通技巧。他將領導隸屬[ORG-01]局的專責辦公室，維護香港關鍵基礎設施的電腦系統安全。」\n \n　　[NAME-01]是[ORG-02]處前[ORG-03]科總警司，曾擔任[ORG-04]主席，於二○二○年從警隊退休後曾於私人企業擔任電腦系統及網絡安全相關主管，並於二○二四年五月起出任[ORG-05]助理總監（關鍵基礎設施）。\n \n　　《條例》今日正式生效，提供完備法定制度保障香港關鍵基礎設施的電腦系統安全、規管關鍵基礎設施的營運者，以及調查和應對相關的電腦系統安全威脅及事故。關鍵基礎設施（電腦系統安全）專員將帶領在同日成立的專責辦公室，負責落實和執行《條例》的法定制度，包括指定「關鍵基礎設施營運者」及「關鍵電腦系統」，並監察其遵從法定責任的情況。 \n \n完",
+    "entities": [
+      {
+        "entity_group": "NAME",
+        "score": 0.999154806137085,
+        "word": "陳永安",
+        "start": 71,
+        "end": 74,
+        "numbered_tag": "NAME-01"
+      },
+      {
+        "entity_group": "NAME",
+        "score": 0.9990076422691345,
+        "word": "陳",
+        "start": 163,
+        "end": 164,
+        "numbered_tag": "NAME-02"
+      },
+      {
+        "entity_group": "ORG",
+        "score": 0.6303762197494507,
+        "word": "保安",
+        "start": 220,
+        "end": 222,
+        "numbered_tag": "ORG-01"
+      },
+      {
+        "entity_group": "NAME",
+        "score": 0.9987614154815674,
+        "word": "陳永安",
+        "start": 254,
+        "end": 257,
+        "numbered_tag": "NAME-01"
+      },
+      {
+        "entity_group": "ORG",
+        "score": 0.7907711863517761,
+        "word": "香港警務",
+        "start": 258,
+        "end": 262,
+        "numbered_tag": "ORG-02"
+      },
+      {
+        "entity_group": "ORG",
+        "score": 0.6202369332313538,
+        "word": "網絡安全及科技罪案調查",
+        "start": 264,
+        "end": 275,
+        "numbered_tag": "ORG-03"
+      },
+      {
+        "entity_group": "ORG",
+        "score": 0.7404820919036865,
+        "word": "國際刑警網絡罪案專家組",
+        "start": 283,
+        "end": 294,
+        "numbered_tag": "ORG-04"
+      },
+      {
+        "entity_group": "ORG",
+        "score": 0.6995225548744202,
+        "word": "保安局",
+        "start": 343,
+        "end": 346,
+        "numbered_tag": "ORG-05"
+      }
+    ]
+  },
+  {
+    "id": 18,
+    "original": "Kathy Hochul 指出，菸草的警告語會列出致癌及成癮風險，塑膠包裝上的標籤會警告兒童窒息的危險，所以社交媒體也需要列出其潛在危險。",
+    "masked": "[NAME-01] 指出，菸草的警告語會列出致癌及成癮風險，塑膠包裝上的標籤會警告兒童窒息的危險，所以社交媒體也需要列出其潛在危險。",
+    "entities": [
+      {
+        "entity_group": "NAME",
+        "score": 0.9975403547286987,
+        "word": "Kathy Hochul",
+        "start": 0,
+        "end": 12,
+        "numbered_tag": "NAME-01"
+      }
+    ]
+  }
+]
