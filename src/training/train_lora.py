@@ -36,16 +36,24 @@ class LogCallback(TrainerCallback):
 def train():
     # 1. 載入數據
     print("📂 載入訓練數據...")
-    with open("train_data_lora.json", "r", encoding="utf-8") as f:
+    # 🔥🔥🔥 修正點：必須讀取清洗後的數據！ 🔥🔥🔥
+    input_file = "train_data_lora_cleaned.json"
+    
+    if not os.path.exists(input_file):
+        print(f"❌ 錯誤：找不到 {input_file}。請先執行 clean_and_augment.py！")
+        return
+
+    with open(input_file, "r", encoding="utf-8") as f:
         raw = json.load(f)
         data = raw["data"]
     
+    print(f"✅ 成功載入 {len(data)} 條清洗後的數據")
     dataset = Dataset.from_list(data).train_test_split(test_size=0.1)
 
     # 2. 載入 Tokenizer
     tokenizer = AutoTokenizer.from_pretrained(BASE_MODEL_NAME)
 
-    # 3. ⚙️ 處理數據 (Point 3：強化標籤對齊邏輯)
+    # 3. ⚙️ 處理數據
     def tokenize_and_align_labels(examples):
         tokenized_inputs = tokenizer(
             examples["tokens"], 
@@ -66,7 +74,6 @@ def train():
                 elif word_idx != previous_word_idx:
                     label_ids.append(label[word_idx])
                 else:
-                    # 🔥 Point 3 核心：標籤傳播，確保模型學會長實體的連續性
                     label_ids.append(label[word_idx])
                 
                 previous_word_idx = word_idx
@@ -75,9 +82,7 @@ def train():
         tokenized_inputs["labels"] = labels
         return tokenized_inputs
 
-    
-
-    print("⚙️ 正在執行全標籤對齊處理 (Label Propagation)...")
+    print("⚙️ 正在執行全標籤對齊處理...")
     tokenized_datasets = dataset.map(
         tokenize_and_align_labels, 
         batched=True,
@@ -95,7 +100,9 @@ def train():
 
     peft_config = LoraConfig(
         task_type=TaskType.TOKEN_CLS, 
-        r=16, lora_alpha=32, lora_dropout=0.1,
+        r=8,              # ✅ 已修正：限制容量，防止死記
+        lora_alpha=16,    # ✅ 已修正：配合 r=8
+        lora_dropout=0.1,
         target_modules=["query", "key", "value", "output.dense", "intermediate.dense"]
     )
     model = get_peft_model(model, peft_config)
@@ -115,7 +122,7 @@ def train():
             "recall": results["overall_recall"]
         }
 
-    # 6. 訓練參數 (Point 5 強化商用精調配置)
+    # 6. 訓練參數
     args = TrainingArguments(
         output_dir="./lora_out",
         eval_strategy="steps",
@@ -123,15 +130,15 @@ def train():
         save_strategy="steps",
         save_steps=100,
         
-        # 🔥 Point 5 優化組合
-        learning_rate=2e-5,           # 低學習率確保精細微調
-        num_train_epochs=5,           # 配合低學習率增加 Epoch 確保收斂
-        lr_scheduler_type="cosine",    # 使用餘弦退火，收尾學得更靚
-        warmup_ratio=0.1,             # 加入熱身防止初期梯度不穩
-        weight_decay=0.01,            # 增加權重衰減防止過擬合
+        learning_rate=2e-5,
+        num_train_epochs=5,
+        lr_scheduler_type="cosine",
+        warmup_ratio=0.1,
+        weight_decay=0.05,            # ✅ 已修正：加強正則化
+        label_smoothing_factor=0.1,   # ✅ 已修正：防止過度自信
         
         per_device_train_batch_size=4,
-        gradient_accumulation_steps=2, # Effective Batch Size = 8
+        gradient_accumulation_steps=2,
         logging_steps=10,
         logging_dir='./logs',
         fp16=torch.cuda.is_available(),

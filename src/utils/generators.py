@@ -7,16 +7,14 @@ def generate_phone():
     prefix = random.choice(['2', '3', '5', '6', '9'])
     rest = "".join([str(random.randint(0, 9)) for _ in range(7)])
     number = prefix + rest
-    # 為了零錯誤，我們減少極端複雜的格式，確保 Tokenizer 容易處理
     formats = [
-        lambda: f"+852-{number}",   # 使用連字符防止被切成多個 O
+        lambda: f"+852-{number}",
         lambda: f"{number}",
         lambda: f"{number[:4]}{number[4:]}"
     ]
     return random.choice(formats)()
 
 def generate_id():
-    # 統一調用你要求的「一體化」邏輯
     return generate_hong_kong_id()
 
 def generate_hong_kong_id():
@@ -24,11 +22,9 @@ def generate_hong_kong_id():
     letter = random.choice("ABCDEFGHIJKLMNOPQRSTUVWXYZ")
     nums = "".join([str(random.randint(0, 9)) for _ in range(6)])
     check = random.choice("0123456789A")
-    # ✅ 零錯誤關鍵：不加空格，確保 Tokenizer 將其視為一個整體或連續實體
     return f"{letter}{nums}({check})"
 
 def generate_account():
-    # 銀行帳號
     return f"{random.randint(100,999)}-{random.randint(100000,999999)}-{random.randint(0,999)}"
 
 def generate_license_plate():
@@ -37,36 +33,66 @@ def generate_license_plate():
 
 def generate_company():
     real_companies = ["HSBC", "MTR", "KMB", "HKTVmall", "Deliveroo", "Foodpanda", "7-Eleven"]
-    # 避免生成的公司名太長或包含奇怪符號
     name = random.choice(real_companies + [fake.company()])
     return name[:20] 
 
-def generate_transliterated_name():
-    first_names = ["伊隆", "華特", "安柏", "約翰", "愛麗絲", "凱特", "羅拔", "史提芬"]
-    last_names = ["馬斯克", "艾薩克森", "赫德", "史密夫", "佐敦", "里夫斯", "拜登"]
+def generate_transliterated_name(corpus_names):
+    """
+    專門處理 English_Cn_Name_Corpus 的組合邏輯
+    從列表中抽 2 個名字，用符號連接
+    """
+    if len(corpus_names) < 2:
+        return random.choice(corpus_names)
+
+    f = random.choice(corpus_names)
+    l = random.choice(corpus_names)
     
-    f = random.choice(first_names)
-    l = random.choice(last_names)
-    
-    # 注意：這裡的點號會被 tokenizer 切開，但在 generate_synthetic.py 的 
-    # tags_list.extend([LABEL2ID[f"I-{entity_type}"]] * (len(tokens) - 1)) 
-    # 邏輯下，點號會自動被標為 I-NAME，這是正確的。
     formats = [
-        f"{f}·{l}", 
-        f"{f}{l}", 
-        f"{l}"
+        f"{f}·{l}",   # 間隔號
+        f"{f}.{l}",   # 點號 (你要求的)
+        f"{f}{l}",    # 無間隔
+        f"{f} {l}",   # 空格
     ]
     return random.choice(formats)
 
-def get_random_fillers(names, addresses):
+def get_random_fillers(names_data, addresses):
+    """
+    names_data 現在是一個 Dict: {"standard": [...], "transliterated": [...]}
+    """
+    safe_addresses = addresses if addresses else ["香港中環"]
+    
+    # 決定使用哪種名字來源
+    # 30% 機率使用譯名 (English_Cn_Name)，70% 使用標準名 (Chinese/Ancient/Japanese)
+    if random.random() < 0.3:
+        # 使用譯名庫 -> 執行組合邏輯 (阿阿哲克.阿阿哲克)
+        target_name = generate_transliterated_name(names_data["transliterated"])
+    else:
+        # 使用標準庫 -> 直接抽取 (陳大文, 李白)
+        target_name = random.choice(names_data["standard"])
+
+    return {
+        "{name}": target_name,
+        "{addr}": random.choice(safe_addresses),
+        "{phone}": generate_phone(),
+        "{id_num}": generate_id(),
+        "{account}": generate_account(),
+        "{plate}": generate_license_plate(),
+        "{org}": generate_company(),
+        "{age}": str(random.randint(18, 80))
+    }
     # 確保輸入不為空
     safe_names = names if names else ["陳大文"]
     safe_addresses = addresses if addresses else ["香港中環"]
 
-    # 30% 外國音譯名, 70% 華人名
-    if random.random() < 0.3:
-        target_name = generate_transliterated_name()
+    # 調整機率：
+    # 由於你的 safe_names 現在是英漢譯名庫，我們應該主要使用「組合模式」
+    # 讓 generate_transliterated_name 使用 safe_names 來生成 "Name.Name"
+    
+    if random.random() < 0.6: 
+        # 60% 機率：組合兩個名字 (例如：阿阿哲克.阿阿哲克奧盧)
+        target_name = generate_transliterated_name(safe_names)
     else:
+        # 40% 機率：直接從列表中抽一個單名 (例如：阿阿哲克)
         target_name = random.choice(safe_names)
 
     return {

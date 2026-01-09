@@ -1,7 +1,7 @@
 import json
 import re
 # ✅ 引入共用的 tokenizer
-from data_utils.tokenizer import smart_tokenize 
+from src.utils.tokenizer import smart_tokenize 
 
 # ==========================================
 # 1. 定義要標註的「實體名單」

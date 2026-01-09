@@ -47,13 +47,11 @@ def clean_and_process_entities(results, text):
     url_ranges = get_url_ranges(text)
     
     # --- Phase 1: 彈性過濾 ---
-    # 保留較多實體，讓後面的合併邏輯有材料可以用
+    # 這裡用到 float() 是為了比較，但沒有改變字典裡面的值
     valid_ents = [r for r in results if float(r['score']) > 0.30] 
     valid_ents = [r for r in valid_ents if not is_in_forbidden_range(r['start'], r['end'], url_ranges)]
 
-    # --- Phase 2: 分層合併 (Point 1 核心) ---
-    # 針對機構和地址，給予強力的合併間距 (max_gap=8)
-    # 針對人名、電話，給予保守的合併間距 (max_gap=2)
+    # --- Phase 2: 分層合併 ---
     configs = {
         "ORG": 8, 
         "ADDRESS": 8,
@@ -62,6 +60,22 @@ def clean_and_process_entities(results, text):
     }
     merged_ents = merge_fragmented_entities(valid_ents, text, configs)
 
+    # --- Phase 3: 生成編號 & 類型轉換 (Fix JSON Error) ---
+    type_counts = defaultdict(int)
+    
+    for ent in merged_ents:
+        # 1. 強制轉換 score 為標準 float，解決 "float32 is not JSON serializable"
+        if 'score' in ent:
+            ent['score'] = float(ent['score'])
+            
+        # 2. 生成編號標籤 (例如 ORG-1)
+        # 確保 entity_group 存在 (有些模型版本輸出 label)
+        label = ent.get('entity_group', ent.get('label', 'UNKNOWN'))
+        type_counts[label] += 1
+        ent['numbered_tag'] = f"{label}-{type_counts[label]}"
+
+    # --- Phase 4: 必須 Return ---
+    return merged_ents
 
 def mask_text(text, entities):
     """根據識別出的實體由後往前進行遮蓋，避免索引偏移"""
