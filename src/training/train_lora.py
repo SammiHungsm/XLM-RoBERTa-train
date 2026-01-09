@@ -16,7 +16,7 @@ from peft import get_peft_model, LoraConfig, TaskType
 import evaluate
 from src.config import BASE_MODEL_NAME, LORA_MODEL_PATH, LABEL2ID, ID2LABEL
 
-# 🔥 自定義日誌記錄器：將訓練過程儲存為 JSON
+# 🔥 自定義日誌記錄器
 class LogCallback(TrainerCallback):
     def __init__(self, log_path="training_history.json"):
         self.log_path = log_path
@@ -45,7 +45,7 @@ def train():
     # 2. 載入 Tokenizer
     tokenizer = AutoTokenizer.from_pretrained(BASE_MODEL_NAME)
 
-    # 3. 處理數據 (修正點：必須執行 map 並賦值給 tokenized_datasets)
+    # 3. ⚙️ 處理數據 (Point 3：強化標籤對齊邏輯)
     def tokenize_and_align_labels(examples):
         tokenized_inputs = tokenizer(
             examples["tokens"], 
@@ -59,24 +59,36 @@ def train():
             word_ids = tokenized_inputs.word_ids(batch_index=i)
             previous_word_idx = None
             label_ids = []
+            
             for word_idx in word_ids:
-                if word_idx is None or word_idx == previous_word_idx:
+                if word_idx is None:
+                    # 特殊 Token (如 [CLS], [SEP]) 保持 -100
                     label_ids.append(-100)
-                else:
+                elif word_idx != previous_word_idx:
+                    # 每個單詞的第一個 Sub-token
                     label_ids.append(label[word_idx])
+                else:
+                    # 🔥 Point 3 核心修改：標籤傳播 (Label Propagation)
+                    # 對於同一個字拆出嚟嘅後續 Sub-tokens，我哋唔再俾 -100
+                    # 直接傳遞原始 Label，確保長實體（例如「有限公司」）成串字模型都收到學習訊號
+                    label_ids.append(label[word_idx])
+                
                 previous_word_idx = word_idx
             labels.append(label_ids)
+
         tokenized_inputs["labels"] = labels
         return tokenized_inputs
 
-    print("⚙️ 正在處理 Tokenization (這可能需要一點時間)...")
+    
+
+    print("⚙️ 正在執行全標籤對齊處理 (Label Propagation)...")
     tokenized_datasets = dataset.map(
         tokenize_and_align_labels, 
         batched=True,
         remove_columns=dataset["train"].column_names
     )
 
-    # 4. 載入模型並配置 LoRA
+    # 4. 載入模型並配置 LoRA (Point 5 建議：調低 Learning Rate)
     model = AutoModelForTokenClassification.from_pretrained(
         BASE_MODEL_NAME, 
         num_labels=len(LABEL2ID),
@@ -107,14 +119,15 @@ def train():
             "recall": results["overall_recall"]
         }
 
-    # 6. 訓練參數
+    # 6. 訓練參數 (Point 5 建議：Warmup + Lower LR)
     args = TrainingArguments(
         output_dir="./lora_out",
         eval_strategy="steps",
         eval_steps=100,
         save_strategy="steps",
         save_steps=100,
-        learning_rate=5e-5,
+        learning_rate=2e-5,          # 🔥 Point 5：降低 LR 至 2e-5 更精細微調
+        warmup_ratio=0.1,            # 🔥 Point 5：加入 10% Warmup Steps
         per_device_train_batch_size=4,
         gradient_accumulation_steps=2,
         num_train_epochs=3,
@@ -138,11 +151,11 @@ def train():
         compute_metrics=compute_metrics,
         callbacks=[
             EarlyStoppingCallback(early_stopping_patience=3),
-            LogCallback(log_path="training_history.json") # 🔥 紀錄 JSON 日誌
+            LogCallback(log_path="training_history.json")
         ]
     )
 
-    print("🚀 啟動微調訓練...")
+    print("🚀 啟動強化版標籤對齊訓練...")
     trainer.train()
 
     # 8. 儲存
