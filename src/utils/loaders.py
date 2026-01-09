@@ -240,25 +240,51 @@ def load_addresses(geojson_folder):
     print(f"✅ 地址載入完成！共 {len(cleaned_addresses)} 條可用地址組合")
     return cleaned_addresses if cleaned_addresses else ["香港中環", "九龍塘"]
 
-def load_negative_samples(folder_path, max_samples=5000):
+def load_negative_samples(json_paths, max_samples=10000):
     samples = []
-    path = Path(folder_path)
-    if not path.exists(): return []
+    print(f"🛡️ 正在從現有數據庫提取「天然負樣本」...")
     
-    print(f"🛡️ 正在讀取並「清洗」負樣本...")
-    for file_path in path.glob("*.txt"):
+    for path_str in json_paths:
+        path = Path(path_str)
+        if not path.exists():
+            print(f"  ⚠️ 跳過 (找不到檔案): {path}")
+            continue
+            
         try:
-            with open(file_path, "r", encoding="utf-8") as f:
-                text = f.read()
-                sentences = re.split(r'[。！？\n]', text)
-                for sent in sentences:
-                    sent = sent.strip()
-                    # 零錯誤關鍵：負樣本絕對不能包含禁止詞
-                    if 10 < len(sent) < 150:
-                        if not any(word in sent for word in STRICT_FORBIDDEN):
-                            samples.append(sent)
-        except: pass
-        
+            with open(path, "r", encoding="utf-8") as f:
+                raw = json.load(f)
+                # 兼容不同格式
+                data_list = raw["data"] if isinstance(raw, dict) and "data" in raw else raw
+                
+                count = 0
+                for item in data_list:
+                    tokens = item.get("tokens", [])
+                    tags = item.get("ner_tags", [])
+                    
+                    # 1. 確保長度一致
+                    if len(tokens) != len(tags): continue
+                    
+                    # 2. 核心邏輯：只有當整句都是 'O' (0) 時，才算負樣本
+                    # (假設 O 的 ID 是 0，這通常是慣例)
+                    if all(t == 0 for t in tags):
+                        # 還原成字串
+                        sent = "".join(tokens)
+                        
+                        # 3. 再次檢查禁止詞 (雙重保險)
+                        if 5 < len(sent) < 150:
+                            if not any(word in sent for word in STRICT_FORBIDDEN):
+                                samples.append(sent)
+                                count += 1
+                                
+                print(f"  - {path.name}: 提取了 {count} 條純淨句子")
+                
+        except Exception as e:
+            print(f"  ❌ 讀取 {path} 失敗: {e}")
+
+    # 隨機採樣，避免數據失衡
     if len(samples) > max_samples:
+        print(f"  ✂️ 樣本過多，隨機選取 {max_samples} 條...")
         samples = random.sample(samples, max_samples)
+        
+    print(f"✅ 負樣本準備完成！共 {len(samples)} 條")
     return samples
