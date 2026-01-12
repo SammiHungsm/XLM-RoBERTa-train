@@ -121,9 +121,9 @@ def generate_synthetic(target_count=20000):
                     elif part == "{bank}": entity_type = "ORG"       # 銀行 -> ORG
                     elif part == "{company}": entity_type = "ORG"    # 公司 -> ORG
                     elif part == "{station}": entity_type = "ORG"    # 菜鳥驛站 -> ORG
-                    elif part == "{pickup_code}": entity_type = "ID" # 取件碼 -> ID
-                    elif part == "{code}": entity_type = "ID"        # 驗證碼 -> ID
-                    elif part == "{order_id}": entity_type = "ID"    # 訂單號 -> ID
+                    elif part == "{pickup_code}": entity_type = "O" # 取件碼 -> ID
+                    elif part == "{code}": entity_type = "O"        # 驗證碼 -> ID
+                    elif part == "{order_id}": entity_type = "O"    # 訂單號 -> ID
                     elif part == "{email}": entity_type = "O"        # Email 暫不遮蔽
                     
                 else:
