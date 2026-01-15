@@ -1,11 +1,18 @@
+# src/utils/loaders.py
 import json
 import os
 import random
 import re
 from pathlib import Path
 
-# 終極禁止名單：防止這些詞出現在標籤為 O 的數據中
-STRICT_FORBIDDEN = ["中國", "國鐵", "港鐵", "MTR", "鐵路", "十四五", "十五五", "政府", "集團"]
+# ✅ 1. 引入中央配置，不再 Hardcode
+from src.config import BASE_FORBIDDEN
+from src.utils.templates import ALL_HK_ORGS
+
+# ✅ 2. 動態構建終極禁止名單
+# 這樣地址載入器 (load_addresses) 和負樣本提取器 (load_negative_samples)
+# 就會自動過濾掉 "HSBC", "7-11" 等機構名，防止將它們誤當成普通地址或無實體文本。
+STRICT_FORBIDDEN = set(BASE_FORBIDDEN) | set(ALL_HK_ORGS)
 
 def load_names(corpus_folder):
     """
@@ -230,6 +237,7 @@ def load_addresses(geojson_folder):
         if len(addr) < 3: continue
         
         # 2. 禁止名單過濾 (完全匹配)
+        # 🔥 這裡現在會自動過濾掉 "HSBC", "MTR" 等機構名
         if any(f == addr for f in STRICT_FORBIDDEN): continue
         
         # 3. 去重
@@ -271,6 +279,7 @@ def load_negative_samples(json_paths, max_samples=10000):
                         sent = "".join(tokens)
                         
                         # 3. 再次檢查禁止詞 (雙重保險)
+                        # 🔥 這裡現在會確保負樣本不包含 "支付寶" 或 "順豐" 等詞
                         if 5 < len(sent) < 150:
                             if not any(word in sent for word in STRICT_FORBIDDEN):
                                 samples.append(sent)

@@ -8,19 +8,16 @@ current_dir = os.path.dirname(os.path.abspath(__file__))
 project_root = os.path.dirname(os.path.dirname(current_dir))
 sys.path.append(project_root)
 
-from src.config import LABEL2ID, ID2LABEL
+# ✅ 1. 從 Config 導入 BASE_FORBIDDEN，保持代碼整潔
+from src.config import LABEL2ID, ID2LABEL, BASE_FORBIDDEN
+# ✅ 2. 導入機構名單，自動同步
+from src.utils.templates import ALL_HK_ORGS 
 
 # O 的 ID
 O_ID = LABEL2ID.get("O", 0)
 
-# 1. 靜態禁止名單
-STRICT_FORBIDDEN = {
-    "中國", "國鐵", "港鐵", "MTR", "鐵路", "集團", "有限公司", "十四五", "十五五", "建設", "發展", "高鐵",
-    "銀行", "HSBC", "匯豐", "渣打", "中銀", "恒生", "支付寶", "Alipay", "PayMe", "FPS", "轉數快",
-    "順豐", "SF Express", "DHL", "淘寶", "Foodpanda", "Deliveroo",
-    "香港", "九龍", "新界", "中心", "大廈", "廣場", "街道", "Road", "Street", "Building", "Tower",
-    "http", "https", ".com", ".org", ".net", "www", "原文網址"
-}
+# 🔥 核心邏輯：動態合併「基礎禁止詞」與「所有已知機構名」
+STRICT_FORBIDDEN = set(BASE_FORBIDDEN) | set(ALL_HK_ORGS)
 
 def load_json(path):
     if not os.path.exists(path):
@@ -33,28 +30,61 @@ def load_json(path):
         return data
 
 def extract_gold_entities(data_list):
-    """動態提取實體"""
+    """
+    🔥 [已升級] 動態提取實體
+    解析 BIO 標籤，還原出完整的實體詞（例如從 "B-ORG, I-ORG" 還原出 "港鐵"）。
+    """
     gold_words = set()
     for item in data_list:
         tokens = item.get("tokens", [])
         tags = item.get("ner_tags", [])
+        
+        current_word = ""
         for i, tag in enumerate(tags):
-            if tag != O_ID: 
-                word = tokens[i].lower()
-                if len(word) >= 2:
-                    gold_words.add(word)
+            if tag != O_ID:
+                current_word += tokens[i]
+            else:
+                if len(current_word) >= 2:
+                    gold_words.add(current_word.lower())
+                current_word = ""
+        
+        if len(current_word) >= 2:
+            gold_words.add(current_word.lower())
+            
     return gold_words
 
 def is_clean(item, forbidden_set):
-    """過濾邏輯"""
+    """
+    🔥 [已升級] 過濾邏輯
+    將 O-tag 的部分重組為字串後再檢查，解決 Tokenizer 將「港鐵」切分後無法過濾的問題。
+    """
     tokens = item.get("tokens", [])
     tags = item.get("ner_tags", [])
+    
     if len(tokens) != len(tags): return False
+
+    # 1. 構建「純 O 內容字串」
+    o_content_segments = []
+    current_segment = ""
+    
     for i, t in enumerate(tokens):
         if tags[i] == O_ID:
-            token_low = t.lower()
-            if token_low in forbidden_set:
-                return False 
+            current_segment += t
+        else:
+            if current_segment:
+                o_content_segments.append(current_segment)
+                current_segment = ""
+    
+    if current_segment:
+        o_content_segments.append(current_segment)
+    
+    # 2. 檢查每個 O 片段是否含有禁止詞
+    for segment in o_content_segments:
+        seg_lower = segment.lower()
+        for forbidden in forbidden_set:
+            if forbidden.lower() in seg_lower:
+                return False
+                
     return True
 
 if __name__ == "__main__":
@@ -66,11 +96,10 @@ if __name__ == "__main__":
     synthetic_raw = load_json("./data/raw/synthetic_data.json")
 
     # 2. 執行前置動態提取
-    # 注意：如果這裡結果是 0，代表 news/mtr 可能有問題，但我們下面的平衡機制會防止它破壞數據集
     dynamic_forbidden = extract_gold_entities(news + mtr)
-    full_forbidden_set = set(w.lower() for w in STRICT_FORBIDDEN) | dynamic_forbidden
+    full_forbidden_set = STRICT_FORBIDDEN | dynamic_forbidden
     print(f"✅ 禁止名單構建完成 (靜態: {len(STRICT_FORBIDDEN)} + 動態: {len(dynamic_forbidden)})")
-
+    
     # 3. 過濾合成數據
     if synthetic_raw:
         print(f"🛡️ 正在執行合成數據最終清洗 (原始: {len(synthetic_raw)})...")
@@ -84,13 +113,13 @@ if __name__ == "__main__":
     # 4. 按權重合併
     all_training_data = []
     
-    # 合成數據 (x1) - 這是我們的主力
+    # 合成數據 (x1)
     all_training_data.extend(synthetic_cleaned)
     
-    # 新聞數據 (x10) - 如果裡面全是負樣本，這一步會引入大量負樣本
+    # 新聞數據 (x10)
     if news: all_training_data.extend(news * 10)
     
-    # 小說數據 (改為 x1) - 降低權重，因為小說通常負樣本很多
+    # 小說數據 (x1)
     if novel: 
         print(f"📉 小說數據權重降至 x1 (防止引入過多負樣本)")
         all_training_data.extend(novel * 1)
@@ -98,16 +127,14 @@ if __name__ == "__main__":
     # 港鐵數據 (x10)
     if mtr: all_training_data.extend(mtr * 10)
 
-    # 5. 🔥 [核心修改] 強制平衡機制 (Balancing)
+    # 5. 強制平衡機制 (Balancing)
     print("⚖️ 正在執行數據平衡 (Target: 負樣本佔總數 ~25%)...")
     
-    # 分離正負樣本
     pos_samples = [d for d in all_training_data if any(t != O_ID for t in d['ner_tags'])]
     neg_samples = [d for d in all_training_data if all(t == O_ID for t in d['ner_tags'])]
     
     print(f"   - 原始分佈 -> 正樣本: {len(pos_samples)} | 負樣本: {len(neg_samples)}")
 
-    # 計算目標負樣本數量 (正樣本的 1/3，即總數的 25% 左右)
     target_neg_count = int(len(pos_samples) * 0.35) 
     
     if len(neg_samples) > target_neg_count:
@@ -116,7 +143,6 @@ if __name__ == "__main__":
     else:
         print(f"   - ✅ 負樣本數量健康，無需削減。")
         
-    # 合併並洗牌
     final_data = pos_samples + neg_samples
     random.shuffle(final_data)
 
