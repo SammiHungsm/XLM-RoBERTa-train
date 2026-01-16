@@ -2,7 +2,6 @@ import random
 from faker import Faker
 
 # 🔥 1. 導入我們在 templates.py 定義好的龐大機構名單
-# 確保 src/utils/templates/__init__.py 裡面已經正確 export 了 ALL_HK_ORGS
 try:
     from src.utils.templates import ALL_HK_ORGS
 except ImportError:
@@ -10,6 +9,14 @@ except ImportError:
     ALL_HK_ORGS = ["HSBC", "MTR", "KMB", "HK Jockey Club"]
 
 fake = Faker(['en_US', 'zh_TW'])
+
+# 🔥 新增：基建/交通路線的地點簡稱 (這些是 Address，用來配合 "高鐵", "線", "大橋" 等後綴)
+# 這些詞會被生成器選中，填入 {addr}，然後在 infrastructure.py 範本中與 "高鐵" 等字組合
+INFRA_PREFIXES = [
+    "西延", "杭衢", "屯馬", "廣深港", "京滬", "港珠澳", 
+    "中九龍", "北環", "東鐵", "南港島", "將軍澳", "東涌",
+    "深中", "青馬", "汀九", "昂船洲", "大老山", "西區"
+]
 
 def generate_phone():
     """生成多種格式的香港電話號碼"""
@@ -121,6 +128,14 @@ def get_random_fillers(names_data, addresses):
     # 確保地址不為空
     safe_addresses = addresses if addresses else ["香港中環"]
     
+    # 🔥 3. 智能地址生成策略
+    # 30% 機率使用 "西延"、"屯馬" 這種簡稱 (為了配合 infrastructure 範本)
+    # 當這些簡稱填入 "{addr}高鐵" 時，"{addr}" 會被標記為 ADDRESS，"高鐵" 為 O
+    if random.random() < 0.3:
+        target_addr = random.choice(INFRA_PREFIXES)
+    else:
+        target_addr = random.choice(safe_addresses)
+    
     # 決定使用哪種名字來源
     # 30% 機率使用譯名 (English_Cn_Name)，70% 使用標準名
     if random.random() < 0.3:
@@ -138,18 +153,17 @@ def get_random_fillers(names_data, addresses):
         else:
             target_name = "陳大文"
 
-    # 🔥 3. 確保這裡的 {addr} 只從真實地址 (safe_addresses) 選取
-    # 我們不再這裡混入「基建名稱」，因為基建應該在 negatives.py 處理 (標記為 O)
-    
     return {
         "{name}": target_name,
-        "{addr}": random.choice(safe_addresses),
+        "{addr}": target_addr, # 這裡現在可能是 "西延" 或 "香港中環..."
         "{phone}": generate_phone(),
         "{id_num}": generate_id(),
         "{account}": generate_account(),
         "{plate}": generate_license_plate(),
         "{org}": generate_company(), 
         "{age}": str(random.randint(18, 80)),
+        
+        # 補漏與兼容舊 Template
         "{bank}": generate_company(),
         "{station}": generate_company(),
         "{company}": generate_company()
