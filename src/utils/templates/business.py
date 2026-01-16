@@ -9,7 +9,14 @@ def get_commercial_finance_templates():
         ["Cheque payable to: ", "{name}", " (A/C No: ", "{account}", ")."],
         ["Wire Transfer Info: Beneficiary ", "{name}", ", IBAN: ", "{account}", "."],
         ["TT Payment to ", "{org}", " A/C ", "{account}", " for invoice ", "{id_num}", "."],
-        ["MPF 強積金供款確認：僱員 ", "{name}", "，帳號 ", "{account}", "。"]
+        ["MPF 強積金供款確認：僱員 ", "{name}", "，帳號 ", "{account}", "。"],
+        ["帳號 ", "{account}", " 請核對。"],
+        ["Bank A/C: ", "{account}", " (Saving)"],
+        ["轉數快識別碼：", "{id_num}", " / ", "{phone}", "。"],
+        ["REF NO: ", "{account}", " (Urgent)"],
+        ["身份證號碼 ", "{id_num}", " 已登記。"],
+        ["ID: ", "{id_num}", "."],
+        ["顧客 ", "{name}", " (VIP ", "{account}", ")。"]
     ]
 
 def get_customer_service_and_hr_templates():
@@ -48,4 +55,25 @@ def get_hong_kong_business_templates():
         # --- 專業法律/合約語境 ---
         ["根據本合約，", "{name}", " (以下簡稱「甲方」) 需向 ", "{org}", " 支付費用。"],
         ["授權代表：", "{name}", "，職位：", "{org}", " 總監。"]
+    ]
+    
+def get_org_position_separation_templates():
+    return [
+        # 1. 現任職位分離
+        ["我是 ", "{org}", " 的 ", "經理", " ", "{name}", "。"],
+        ["", "{org}", " ", "行政總裁", " ", "{name}", " 昨日表示公司業績良好。"],
+        ["請聯絡 ", "{org}", " ", "人力資源部主管", " ", "{name}", " 先生。"],
+        ["", "{name}", " 現擔任 ", "{org}", " 的 ", "首席財務官", "。"],
+        ["出席者包括 ", "{org}", " ", "主席", " ", "{name}", " 及副主席。"],
+        
+        # 2. 前任/履歷分離 (Profile Descriptions)
+        ["前 ", "{org}", " ", "主席", " ", "{name}", " 出席會議。"],
+        ["", "{name}", "，", "{org}", " 創辦人，曾任職於 ", "{org}", "。"],
+        ["", "{name}", " (", "前 ", "{org}", " 副總裁", ") 發表了演講。"],
+        ["據 ", "{org}", " 前 ", "總工程師", " ", "{name}", " 透露。"],
+        ["", "{name}", " 先生曾於 2020 年擔任 ", "{org}", " 的 ", "顧問", "。"],
+        # 複雜履歷句型：ORG + Title + 連接詞 + ORG + Title
+        ["", "{name}", " 曾任 ", "{org}", " ", "總警司", "，現為 ", "{org}", " ", "顧問", "。"],
+        ["", "{org}", " ", "前總裁", " ", "{name}", "，轉投 ", "{org}", " 擔任 ", "主席", "。"],
+        ["", "{name}", "是 ", "{org}", " 的 ", "創辦人", "，亦曾擔任 ", "{org}", " 的 ", "董事", "。"]
     ]
