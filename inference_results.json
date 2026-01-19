@@ -2,7 +2,7 @@
   {
     "id": 0,
     "original": "據中國國家鐵路集團有限公司今（4日）披露，鐵路「十四五」實現圓滿收官。「十四五」期間，全國鐵路營業里程由14.63萬公里增至16.5萬公里、增長12.8%，高鐵由3.79萬公里增至5.04萬公里、增長32.98%，中國建成世界規模最大、先進發達的高速鐵路網。2025年，國鐵集團加快建設現代化鐵路基礎設施體系，圓滿完成鐵路建設任務，全國鐵路完成固定資產投資9015億元人民幣、同比增長6%，投產新線3109公里，其中高鐵2862公里，鐵路投資拉動作用充分顯現。2025年，國鐵集團以國家「十四五」規劃綱要確定的102項重大工程鐵路項目和「兩重」項目為重點，加大實施力度，長贛高鐵等8個項目開工建設，瀋白高鐵等25個項目開通運營。加快物流基礎設施建設，建成鐵路專用線52條。「十五五」期間，國鐵集團將進一步推進鐵路網建設。到2030年，全國鐵路營業里程達到18萬公里左右，其中高鐵6萬公里左右，復線率和電氣化率分別達到64%和78%，戰略骨幹通道全面加強，「八縱八橫」高鐵系統成網，區域互聯互通水平顯著提升，貨運網絡能力大幅增強，基本建成世界一流的現代化鐵路網。原文網址：https://news.mingpao.com/ins/%E5%85%A9%E5%B2%B8/article/20260104/s00004/1767518315152",
-    "masked": "據[ORG-1]今（4日）披露，鐵路「十四五」實現圓滿收官。「十四五」期間，全國鐵路營業里程由14.63萬公里增至16.5萬公里、增長12.8%，高鐵由3.79萬公里增至5.04萬公里、增長32.98%，[ADDRESS-1]建成世界規模最大、先進發達的高速鐵路網。2025年，[ORG-2]加快建設現代化鐵路基礎設施體系，圓滿完成鐵路建設任務，全國鐵路完成固定資產投資9015億元人民幣、同比增長6%，投產新線3109公里，其中高鐵2862公里，鐵路投資拉動作用充分顯現。2025年，[ORG-3]以國家「十四五」規劃綱要確定的102項重大工程鐵路項目和「兩重」項目為重點，加大實施力度，[ADDRESS-2]高鐵等8個項目開工建設，[ORG-4][ADDRESS-3]高鐵等25個項目開通運營。加快物流基礎設施建設，建成鐵路專用線52條。「十五五」期間，[ORG-5]將進一步推進鐵路網建設。到2030年，全國鐵路營業里程達到18萬公里左右，其中高鐵6萬公里左右，復線率和電氣化率分別達到64%和78%，戰略骨幹通道全面加強，「八縱八橫」高鐵系統成網，區域互聯互通水平顯著提升，貨運網絡能力大幅增強，基本建成世界一流的現代化鐵路網。原文網址：https://news.mingpao.com/ins/%E5%85%A9%E5%B2%B8/article/20260104/s00004/1767518315152",
+    "masked": "據[ORG-1]今（4日）披露，鐵路「十四五」實現圓滿收官。「十四五」期間，全國鐵路營業里程由14.63萬公里增至16.5萬公里、增長12.8%，高鐵由3.79萬公里增至5.04萬公里、增長32.98%，[ADDRESS-1]建成世界規模最大、先進發達的高速鐵路網。2025年，[ORG-2]加快建設現代化鐵路基礎設施體系，圓滿完成鐵路建設任務，全國鐵路完成固定資產投資9015億元人民幣、同比增長6%，投產新線3109公里，其中高鐵2862公里，鐵路投資拉動作用充分顯現。2025年，[ORG-3]以國家「十四五」規劃綱要確定的102項重大工程鐵路項目和「兩重」項目為重點，加大實施力度，[ADDRESS-2]高鐵等8個項目開工建設，[ADDRESS-3]高鐵等25個項目開通運營。加快物流基礎設施建設，建成鐵路專用線52條。「十五五」期間，[ORG-4]將進一步推進鐵路網建設。到2030年，全國鐵路營業里程達到18萬公里左右，其中高鐵6萬公里左右，復線率和電氣化率分別達到64%和78%，戰略骨幹通道全面加強，「八縱八橫」高鐵系統成網，區域互聯互通水平顯著提升，貨運網絡能力大幅增強，基本建成世界一流的現代化鐵路網。原文網址：https://news.mingpao.com/ins/%E5%85%A9%E5%B2%B8/article/20260104/s00004/1767518315152",
     "entities": [
       {
         "entity_group": "ORG",
@@ -45,18 +45,10 @@
         "numbered_tag": "ADDRESS-2"
       },
       {
-        "entity_group": "ORG",
-        "score": 0.36443331837654114,
-        "word": "瀋",
-        "start": 299,
-        "end": 300,
-        "numbered_tag": "ORG-4"
-      },
-      {
         "entity_group": "ADDRESS",
         "score": 0.3734380304813385,
-        "word": "白",
-        "start": 300,
+        "word": "瀋白",
+        "start": 299,
         "end": 301,
         "numbered_tag": "ADDRESS-3"
       },
@@ -66,7 +58,7 @@
         "word": "國鐵集團",
         "start": 344,
         "end": 348,
-        "numbered_tag": "ORG-5"
+        "numbered_tag": "ORG-4"
       }
     ]
   },
@@ -310,9 +302,9 @@
     "entities": [
       {
         "entity_group": "PHONE",
-        "score": 0.3696507215499878,
-        "word": " 9123 4567",
-        "start": 5,
+        "score": 1.0,
+        "word": "9123 4567",
+        "start": 6,
         "end": 15,
         "numbered_tag": "PHONE-1"
       },
@@ -329,7 +321,7 @@
   {
     "id": 9,
     "original": "Sammi 之前打過黎。",
-    "masked": "[NAME-1] 之前打過[NAME-2]。",
+    "masked": "[NAME-1] 之前打過黎。",
     "entities": [
       {
         "entity_group": "NAME",
@@ -338,21 +330,13 @@
         "start": 0,
         "end": 5,
         "numbered_tag": "NAME-1"
-      },
-      {
-        "entity_group": "NAME",
-        "score": 0.8094685673713684,
-        "word": "黎",
-        "start": 10,
-        "end": 11,
-        "numbered_tag": "NAME-2"
       }
     ]
   },
   {
     "id": 10,
     "original": "Edmond梁，身高185cm，居住於香港觀塘 AIA Tower 31樓，Bank Account = 274542182882現任Alibaba CEO，電話為 21678080，身份證號為 R98272829。",
-    "masked": "[NAME-1]，身高185cm，居住於[ADDRESS-1]，Bank Account = 274542182882現任[ORG-1] CEO，電話為 21678080，[ID-1]。",
+    "masked": "[NAME-1]，身高185cm，居住於[ADDRESS-1]，Bank Account = [ACCOUNT-1]現任[ORG-1] CEO，電話為 [PHONE-1]，[ID-1]。",
     "entities": [
       {
         "entity_group": "NAME",
@@ -371,12 +355,28 @@
         "numbered_tag": "ADDRESS-1"
       },
       {
+        "entity_group": "ACCOUNT",
+        "score": 1.0,
+        "word": "274542182882",
+        "start": 53,
+        "end": 65,
+        "numbered_tag": "ACCOUNT-1"
+      },
+      {
         "entity_group": "ORG",
         "score": 0.9050729274749756,
         "word": "Alibaba",
         "start": 67,
         "end": 74,
         "numbered_tag": "ORG-1"
+      },
+      {
+        "entity_group": "PHONE",
+        "score": 1.0,
+        "word": "21678080",
+        "start": 83,
+        "end": 91,
+        "numbered_tag": "PHONE-1"
       },
       {
         "entity_group": "ID",
@@ -391,7 +391,7 @@
   {
     "id": 11,
     "original": "Hey, my name is Alex Chan. I just moved to 12A Nathan Road in Kowloon last week. If you need to reach me, my phone number is 91234567. By the way, my Hong Kong ID is R123456(7), and my bank account number is 1234567890. I’m working at TechCorp Limited now, so most emails will come from that domain. Oh, and my car license plate is AB1234, registered under TechCorp Limited. Let me know if you need any more details.",
-    "masked": "Hey, my name is [NAME-1]. I just moved to [ADDRESS-1] in [ADDRESS-2] last week. If you need to reach me, my phone number is 91234567. By the way, my [ADDRESS-3] ID is [ID-1], and my bank account number is 1234567890. I’m working at [ORG-1] now, so most emails will come from that domain. Oh, and my car license plate is [LICENSE_PLATE-1], registered under [ORG-2]. Let me know if you need any more details.",
+    "masked": "Hey, my name is [NAME-1]. I just moved to [ADDRESS-1] in [ADDRESS-2] last week. If you need to reach me, my phone number is [PHONE-1]. By the way, my [ADDRESS-3] ID is [ID-1], and my bank account number is [ACCOUNT-1]. I’m working at [ORG-1] now, so most emails will come from that domain. Oh, and my car license plate is [LICENSE_PLATE-1], registered under [ORG-2]. Let me know if you need any more details.",
     "entities": [
       {
         "entity_group": "NAME",
@@ -418,6 +418,14 @@
         "numbered_tag": "ADDRESS-2"
       },
       {
+        "entity_group": "PHONE",
+        "score": 1.0,
+        "word": "91234567",
+        "start": 125,
+        "end": 133,
+        "numbered_tag": "PHONE-1"
+      },
+      {
         "entity_group": "ADDRESS",
         "score": 0.7461729049682617,
         "word": "Hong Kong",
@@ -432,6 +440,14 @@
         "start": 166,
         "end": 176,
         "numbered_tag": "ID-1"
+      },
+      {
+        "entity_group": "ACCOUNT",
+        "score": 1.0,
+        "word": "1234567890",
+        "start": 208,
+        "end": 218,
+        "numbered_tag": "ACCOUNT-1"
       },
       {
         "entity_group": "ORG",
