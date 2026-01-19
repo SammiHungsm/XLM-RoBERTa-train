@@ -1,17 +1,18 @@
 import random
 from faker import Faker
 
-# 🔥 1. 導入我們在 templates.py 定義好的龐大機構名單
+# 🔥 1. 導入我們在 templates.py 定義好的龐大機構名單 & 真實地址
 try:
-    from src.utils.templates import ALL_HK_ORGS
+    # 注意這裡新增了 ALL_REAL_ADDRESSES (來自銀行 Excel)
+    from src.utils.templates import ALL_HK_ORGS, ALL_REAL_ADDRESSES
 except ImportError:
-    print("⚠️ 警告：找不到 ALL_HK_ORGS，將使用預設名單。")
+    print("⚠️ 警告：找不到 ALL_HK_ORGS 或 ALL_REAL_ADDRESSES，將使用預設名單。")
     ALL_HK_ORGS = ["HSBC", "MTR", "KMB", "HK Jockey Club"]
+    ALL_REAL_ADDRESSES = ["香港中環德輔道中"]
 
 fake = Faker(['en_US', 'zh_TW'])
 
-# 🔥 新增：基建/交通路線的地點簡稱 (這些是 Address，用來配合 "高鐵", "線", "大橋" 等後綴)
-# 這些詞會被生成器選中，填入 {addr}，然後在 infrastructure.py 範本中與 "高鐵" 等字組合
+# 基建/交通路線的地點簡稱 (用來配合 "高鐵", "線", "大橋" 等後綴)
 INFRA_PREFIXES = [
     "西延", "杭衢", "屯馬", "廣深港", "京滬", "港珠澳", 
     "中九龍", "北環", "東鐵", "南港島", "將軍澳", "東涌",
@@ -26,8 +27,9 @@ def generate_phone():
     formats = [
         lambda: f"+852-{number}",
         lambda: f"{number}",
-        lambda: f"{number[:4]} {number[4:]}", # 增加空格格式 9123 4567
-        lambda: f"+852 {number}"
+        lambda: f"{number[:4]} {number[4:]}", # 9123 4567 (訓練模型跨越空格)
+        lambda: f"+852 {number}",
+        lambda: f"(852) {number}"
     ]
     return random.choice(formats)()
 
@@ -36,9 +38,10 @@ def generate_id():
 
 def generate_hong_kong_id():
     """
-    生成香港身分證，包含多種變體以解決 inference #11 的問題
+    生成香港身分證，包含多種變體
+    🔥 數據增強：加入空格和符號，解決 Tokenizer 將數字切碎導致識別困難的問題
     """
-    # 🔥 針對 #11 失敗案例 (R開頭)，我們刻意提高 R 的出現率 (20%)
+    # R字頭出現率 20% (模擬舊式/外籍)
     if random.random() < 0.2:
         letter = "R"
     else:
@@ -48,32 +51,37 @@ def generate_hong_kong_id():
     check = random.choice("0123456789A")
     
     rand = random.random()
-    if rand < 0.4:
-        # 標準格式: A123456(7)
+    if rand < 0.3:
+        # 標準: A123456(7)
         return f"{letter}{nums}({check})"
-    elif rand < 0.7:
-        # 無括號: A1234567 (針對 #8 失敗案例)
-        return f"{letter}{nums}{check}"
-    else:
-        # 字母有空格: A 123456(7) (增加難度，針對英文語境)
+    elif rand < 0.5:
+        # 字母有空格: A 123456(7) (這能訓練模型連接 _A 和 _123)
         return f"{letter} {nums}({check})"
+    elif rand < 0.7:
+        # 無括號: A1234567
+        return f"{letter}{nums}{check}"
+    elif rand < 0.85:
+        # 帶橫線: A-123456(7)
+        return f"{letter}-{nums}({check})"
+    else:
+        # 雜亂空格 (模擬 OCR 錯誤或手殘): A 123 456(7)
+        return f"{letter} {nums[:3]} {nums[3:]}({check})"
 
 def generate_account():
     """
-    🔥 針對 #10 失敗案例 (數字斷裂)
-    讓帳號長度變化更大，並隨機加入符號，訓練模型跨 Token 識別
+    🔥 帳號增強：大幅增加空格和橫線的變體
     """
     length = random.randint(8, 18)
     acc = "".join([str(random.randint(0, 9)) for _ in range(length)])
     
     rand = random.random()
-    if rand < 0.2:
+    if rand < 0.3:
         # 加橫線: 123-456-789
         if length > 6:
             return f"{acc[:3]}-{acc[3:7]}-{acc[7:]}"
         return acc
-    elif rand < 0.4:
-        # 加空格: 123 456 789
+    elif rand < 0.6:
+        # 加空格: 123 456 789 (重要！訓練模型跨 Token 識別)
         if length > 8:
             return f"{acc[:4]} {acc[4:]}"
         return acc
@@ -82,30 +90,30 @@ def generate_account():
         return acc
 
 def generate_license_plate():
-    # 增加變體：有的車牌可能會有空格，例如 "AB 1234"
+    """車牌增強"""
     prefix = "".join(random.choices("ABCDEFGHIJKLMNOPQRSTUVWXYZ", k=2))
     num = random.randint(100, 9999)
-    if random.random() < 0.3:
-        return f"{prefix} {num}" # 加空格
-    return f"{prefix}{num}"
+    
+    rand = random.random()
+    if rand < 0.4:
+        return f"{prefix} {num}" # AB 1234 (有空格)
+    elif rand < 0.5:
+        return f"{prefix}-{num}" # AB-1234
+    else:
+        return f"{prefix}{num}"  # AB1234
 
 def generate_company():
-    # 🔥 2. 使用導入的 ALL_HK_ORGS
-    # 如果 ALL_HK_ORGS 沒東西 (防呆)，就用 fallback
-    
+    # 優先使用真實銀行/機構名單
     candidates = ALL_HK_ORGS if ALL_HK_ORGS else ["HSBC", "MTR", "KMB"]
     
-    # 偶爾 (10%) 還是會用 Faker 生成一些隨機公司名，增加多樣性
+    # 10% 機率用 Faker 生成隨機公司，保持多樣性
     if random.random() < 0.1:
         return fake.company()
     
     return random.choice(candidates)
 
 def generate_transliterated_name(corpus_names):
-    """
-    專門處理 English_Cn_Name_Corpus 的組合邏輯
-    從列表中抽 2 個名字，用符號連接
-    """
+    """處理譯名組合 (English_Cn_Name)"""
     if not corpus_names or len(corpus_names) < 2:
         return "阿諾·舒華" # Fallback
 
@@ -122,31 +130,29 @@ def generate_transliterated_name(corpus_names):
 
 def get_random_fillers(names_data, addresses):
     """
-    names_data: {"standard": [...], "transliterated": [...]}
-    addresses: 從 loaders.py 載入的真實地址列表
+    names_data: 名字庫
+    addresses: 來自 loaders.py 的隨機路名
     """
-    # 確保地址不為空
-    safe_addresses = addresses if addresses else ["香港中環"]
     
-    # 🔥 3. 智能地址生成策略
-    # 30% 機率使用 "西延"、"屯馬" 這種簡稱 (為了配合 infrastructure 範本)
-    # 當這些簡稱填入 "{addr}高鐵" 時，"{addr}" 會被標記為 ADDRESS，"高鐵" 為 O
+    # 🔥 3. 地址合併策略
+    # 將 loaders.py 的隨機路名 與 銀行 CSV 的真實地址合併
+    combined_addresses = (addresses or []) + ALL_REAL_ADDRESSES
+    safe_addresses = combined_addresses if combined_addresses else ["香港中環"]
+    
+    # 30% 機率使用 "西延"、"屯馬" 簡稱 (配合基建範本)
     if random.random() < 0.3:
         target_addr = random.choice(INFRA_PREFIXES)
     else:
         target_addr = random.choice(safe_addresses)
     
-    # 決定使用哪種名字來源
-    # 30% 機率使用譯名 (English_Cn_Name)，70% 使用標準名
+    # 名字策略：30% 譯名，70% 標準名
     if random.random() < 0.3:
-        # 使用譯名庫 -> 執行組合邏輯
         trans_list = names_data.get("transliterated", [])
         if trans_list:
             target_name = generate_transliterated_name(trans_list)
         else:
             target_name = "John Doe"
     else:
-        # 使用標準庫 -> 直接抽取
         std_list = names_data.get("standard", [])
         if std_list:
             target_name = random.choice(std_list)
@@ -155,7 +161,7 @@ def get_random_fillers(names_data, addresses):
 
     return {
         "{name}": target_name,
-        "{addr}": target_addr, # 這裡現在可能是 "西延" 或 "香港中環..."
+        "{addr}": target_addr,
         "{phone}": generate_phone(),
         "{id_num}": generate_id(),
         "{account}": generate_account(),
@@ -163,7 +169,7 @@ def get_random_fillers(names_data, addresses):
         "{org}": generate_company(), 
         "{age}": str(random.randint(18, 80)),
         
-        # 補漏與兼容舊 Template
+        # 兼容性 Keys
         "{bank}": generate_company(),
         "{station}": generate_company(),
         "{company}": generate_company()

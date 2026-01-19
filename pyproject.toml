@@ -10,6 +10,7 @@ dependencies = [
     "en-core-web-sm",
     "evaluate>=0.4.6",
     "numpy<2.0.0",
+    "openpyxl>=3.1.5",
     "peft>=0.18.0",
     "pip>=25.3",
     "presidio-analyzer[transformers]>=2.2.360",
@@ -25,6 +26,7 @@ dependencies = [
     "torchaudio>=2.6.0",
     "torchvision>=0.21.0",
     "transformers>=4.30.0,<5.0.0",
+    "xlrd>=2.0.2",
 ]
 
 [[tool.uv.index]]
