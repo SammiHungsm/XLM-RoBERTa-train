@@ -2,22 +2,54 @@ import re
 from collections import defaultdict
 
 class PIIProcessor:
-    # ===========================
-    # 🔧 Configuration & Constants
-    # ===========================
+    # =========================================================================
+    # 🔧 1. Configuration & Rules (配置中心 - 業務邏輯集中管理)
+    # =========================================================================
+    
+    # 信心門檻與窗口大小 (Magic Numbers)
+    DEFAULT_CONFIDENCE = 0.30
+    CONTEXT_WINDOW_SIZE = 20
+
+    # 允許擴張邊界的標籤
     EXPANDABLE_LABELS = {"ID", "ACCOUNT", "PHONE", "LICENSE_PLATE"}
     
-    # Generic suffix rules (Language-based, not entity-specific)
+    # 基建後綴規則 (通用語言庫)
     INFRA_SUFFIXES = [
         "高鐵", "鐵路", "大橋", "隧道", "幹線", "公路", "通道", "線", "站",
         "High Speed Rail", "Bridge", "Tunnel", "Line", "Station", "Rail"
     ]
     
+    # 年齡關鍵詞
     AGE_KEYWORDS = {'歲', 'years', 'yrs', 'age', 'old', '今年', '年紀', 'at'}
 
-    # Cantonese particle filter list
+    # 粵語規則配置
     CANTONESE_PARTICLES = {'黎', '嚟', '巨', '咗', '度'}
+    CANTONESE_VERBS = {'過', '打', '返', '嚟', '去', '左'} # 觸發粒詞檢查的前置動詞
 
+    # 合併策略配置：定義不同實體允許的最大斷裂距離 (Token Gap)
+    MERGE_GAP_TOLERANCE = {
+        "ORG": 1, 
+        "ADDRESS": 1, 
+        "NAME": 1, 
+        "PHONE": 2, 
+        "ACCOUNT": 2, 
+        "ID": 1
+    }
+
+    # 優先級配置：解決重疊時誰贏 (數值越大越優先)
+    # Regex 抓到的通常由此邏輯保護
+    LABEL_PRIORITY = {
+        "LICENSE_PLATE": 50, 
+        "ID": 50, 
+        "EMAIL": 50, 
+        "PHONE": 40, 
+        "NAME": 30, 
+        "ORG": 20, 
+        "ADDRESS": 20, 
+        "ACCOUNT": 10
+    }
+
+    # Regex 規則庫
     REGEX_PATTERNS = {
         "ID": r'(?<![A-Za-z0-9])[A-Z]{1,2}\s?[0-9]{6}\(?[0-9A]\)?(?![A-Za-z0-9])',
         "LICENSE_PLATE": r'(?<!\bof\s)(?<!\bage\s)(?<!\bat\s)(?<![a-z])[A-Z]{2}\s?[0-9]{1,4}(?![0-9])',
@@ -26,16 +58,15 @@ class PIIProcessor:
         "ACCOUNT": r'(?<!\d)\d{3}[-\s]?\d{3,6}[-\s]?\d{3,}(?!\d)'
     }
 
-    # 🗑️ Removed OVERRIDE_TYPES to avoid hardcoding. Trust the model.
+    # =========================================================================
+    # ⚙️ 2. Initialization & Helpers
+    # =========================================================================
 
     def __init__(self, text, raw_entities):
         self.text = text
         self.entities = raw_entities
         self.url_ranges = self._get_url_ranges()
 
-    # ===========================
-    # 🛠️ Internal Helpers
-    # ===========================
     def _get_url_ranges(self):
         url_pattern = r'https?://[^\s,]+'
         return [match.span() for match in re.finditer(url_pattern, self.text)]
@@ -52,11 +83,15 @@ class PIIProcessor:
         if label in ["PHONE", "ACCOUNT"]: return char.isdigit() or char in "-+ "
         return False
 
-    # ===========================
-    # ⚙️ Processing Steps
-    # ===========================
+    # =========================================================================
+    # 🚀 3. Core Logic (Logic is now pure, referencing Configs)
+    # =========================================================================
 
-    def filter_low_confidence(self, threshold=0.30):
+    def filter_low_confidence(self, threshold=None):
+        # Use config default if not provided
+        if threshold is None:
+            threshold = self.DEFAULT_CONFIDENCE
+            
         valid = []
         for r in self.entities:
             r['score'] = float(r['score'])
@@ -65,35 +100,29 @@ class PIIProcessor:
         self.entities = valid
 
     def normalize_infrastructure_labels(self):
-        """
-        Normalize labels based on infrastructure suffixes.
-        E.g., if an entity is followed by "Rail", it's likely an ADDRESS.
-        """
+        """利用後綴規則 (Suffix Rule) 校正地點標籤"""
         if not self.entities: return
         
         self.entities.sort(key=lambda x: x['start'])
         is_infra_chain = [False] * len(self.entities)
 
-        # Scan backwards
         for i in range(len(self.entities) - 1, -1, -1):
             ent = self.entities[i]
             next_text = self.text[ent['end']:].lstrip()
             
-            # A. Check if touching a suffix
             touches_suffix = False
             for suffix in self.INFRA_SUFFIXES:
                 if next_text.startswith(suffix):
                     touches_suffix = True
                     break
             
-            # B. Check if touching a verified infrastructure entity
             touches_next_infra = False
             if i < len(self.entities) - 1:
                 next_ent = self.entities[i+1]
+                # 檢查是否接觸下一個已確認的基建實體
                 if next_ent['start'] - ent['end'] == 0 and is_infra_chain[i+1]:
                     touches_next_infra = True
 
-            # Decision: Force to ADDRESS if part of infra chain
             if touches_suffix or touches_next_infra:
                 ent['entity_group'] = "ADDRESS"
                 is_infra_chain[i] = True
@@ -101,12 +130,13 @@ class PIIProcessor:
     def merge_fragments(self):
         if not self.entities: return
         self.entities.sort(key=lambda x: x['start'])
-        configs = {"ORG": 1, "ADDRESS": 1, "NAME": 1, "PHONE": 2, "ACCOUNT": 2, "ID": 1}
         
         merged = []
         curr = self.entities[0]
+        
         for next_ent in self.entities[1:]:
-            max_gap = configs.get(curr['entity_group'], 2)
+            # ✅ 從配置讀取 Gap Tolerance
+            max_gap = self.MERGE_GAP_TOLERANCE.get(curr['entity_group'], 2)
             gap = next_ent['start'] - curr['end']
             
             if next_ent['entity_group'] == curr['entity_group'] and gap <= max_gap:
@@ -120,20 +150,18 @@ class PIIProcessor:
         self.entities = merged
 
     def filter_cantonese_particles(self):
-        """Filter out common Cantonese particles mistaken for Names"""
+        """過濾粵語助詞 (Kill Rule)"""
         valid_entities = []
         for ent in self.entities:
             keep = True
             word = ent['word'].strip()
             
-            # If single char NAME and is a particle
             if ent['entity_group'] == "NAME" and len(word) == 1 and word in self.CANTONESE_PARTICLES:
-                # Check preceding character
                 prev_char_idx = ent['start'] - 1
                 if prev_char_idx >= 0:
                     prev_char = self.text[prev_char_idx]
-                    # Common verb endings in Cantonese
-                    if prev_char in {'過', '打', '返', '嚟', '去', '左'}:
+                    # ✅ 從配置讀取動詞表
+                    if prev_char in self.CANTONESE_VERBS:
                         keep = False
             
             if keep:
@@ -165,7 +193,6 @@ class PIIProcessor:
             keep_entity = True
             clean_word = ent['word'].strip()
             
-            # Aggressive Filtering: Pure numbers, punctuation, keywords
             if clean_word.lower() in self.AGE_KEYWORDS:
                 keep_entity = False
             elif re.match(r'^[,，\.\s。？！!?-]+$', ent['word']):
@@ -176,7 +203,9 @@ class PIIProcessor:
             if keep_entity and ent['entity_group'] == "ADDRESS":
                 current_word = self.text[ent['start']:ent['end']]
                 next_text = self.text[ent['end']:].lstrip().lower()
-                prev_start = max(0, ent['start'] - 20)
+                
+                # ✅ 使用配置的窗口大小
+                prev_start = max(0, ent['start'] - self.CONTEXT_WINDOW_SIZE)
                 prev_text = self.text[prev_start:ent['start']].lower()
                 
                 is_age_context = False
@@ -250,14 +279,14 @@ class PIIProcessor:
 
     def resolve_overlaps(self):
         if not self.entities: return
-        label_priority = {
-            "LICENSE_PLATE": 5, "ID": 5, "EMAIL": 5, "PHONE": 4, 
-            "NAME": 3, "ORG": 2, "ADDRESS": 2, "ACCOUNT": 1
-        }
+        
+        # ✅ 從配置讀取優先級
         self.entities.sort(key=lambda x: (
-            label_priority.get(x['entity_group'], 0), 
-            x['end'] - x['start'], x['score']
+            self.LABEL_PRIORITY.get(x['entity_group'], 0), 
+            x['end'] - x['start'], 
+            x['score']
         ), reverse=True)
+        
         final = []
         for ent in self.entities:
             is_overlapping = False
@@ -273,14 +302,12 @@ class PIIProcessor:
     def assign_numbered_tags(self):
         """
         Assigns consistent numbered tags.
-        Example: First "Google" -> ORG-1. Second "Google" -> ORG-1. "Apple" -> ORG-2.
         """
         type_counts = defaultdict(int)
-        entity_value_map = {} # Map content to tag number
+        entity_value_map = {}
 
         for ent in self.entities:
             label = ent['entity_group']
-            # Normalize text to ignore case/spacing differences
             clean_word = ent['word'].strip().lower()
             key = (label, clean_word)
 
@@ -290,31 +317,25 @@ class PIIProcessor:
             
             ent['numbered_tag'] = f"{label}-{entity_value_map[key]}"
 
-    # ===========================
-    # 🚀 Main Execution Pipeline
-    # ===========================
+    # =========================================================================
+    # 🚀 4. Execution Pipeline
+    # =========================================================================
     
     def process(self):
-        # 1. Basic Cleaning
         self.filter_low_confidence()
-        # Infrastructure normalization (Suffix Rule) - NO HARDCODING
         self.normalize_infrastructure_labels()
         self.merge_fragments()
         
-        # 2. 🔥 Kill First: Remove invalid entities
-        # Remove "黎" in "打過黎"
-        # Remove pure numbers mistakenly labeled as ADDRESS (so Regex can catch them later)
+        # Kill Phase
         self.cut_infrastructure_suffix()
         self.refine_address_age()
         self.filter_cantonese_particles()
         
-        # 3. 🔥 Fill Later: Regex + Expansion
-        # Expand remaining valid entities
+        # Fill Phase
         self.expand_boundaries()
-        # Catch any phone/account numbers that were cleared in step 2
         self.apply_regex_fallback()
         
-        # 4. Finalize
+        # Finalize
         self.resolve_overlaps()
         self.assign_numbered_tags()
         return self.entities
