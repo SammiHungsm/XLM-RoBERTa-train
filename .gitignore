@@ -48,3 +48,5 @@ output/
 # --- 5. IDE Settings ---
 .vscode/
 .idea/
+
+models/
