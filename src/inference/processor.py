@@ -78,9 +78,21 @@ class PIIProcessor:
         return False
 
     def _is_valid_char_for_expansion(self, char, label):
-        if label == "ID": return char.isalnum() or char in "()"
-        if label == "LICENSE_PLATE": return char.isalnum() or char == " "
-        if label in ["PHONE", "ACCOUNT"]: return char.isdigit() or char in "-+ "
+        # 輔助函數：檢查是否為 ASCII 字母或數字 (排除中文)
+        def is_ascii_alnum(c):
+            return c.isascii() and c.isalnum()
+
+        if label == "ID": 
+            # ID 只允許 ASCII 字母、數字和括號
+            return is_ascii_alnum(char) or char in "()"
+            
+        if label == "LICENSE_PLATE": 
+            # 車牌只允許 ASCII 字母、數字和空格
+            return is_ascii_alnum(char) or char == " "
+            
+        if label in ["PHONE", "ACCOUNT"]: 
+            return char.isdigit() or char in "-+ "
+            
         return False
 
     # =========================================================================

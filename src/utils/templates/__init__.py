@@ -14,7 +14,10 @@ from .business import (
     get_customer_service_and_hr_templates,
     get_hong_kong_business_templates,
     get_long_entity_templates,
-    get_org_position_separation_templates
+    get_org_position_separation_templates,
+    get_job_title_boundary_templates, 
+    get_id_confusion_templates,
+    get_weak_entity_templates  # 🔥 [新增] 導入弱點修復模板
 )
 from .logistics import (
     get_logistics_and_ecommerce_templates
@@ -26,7 +29,6 @@ from .negatives import (
 )
 from .orgs import (
     get_supplementary_data,
-    # 將 orgs.py 裡定義的豐富名單 (譚仔、Donki...) 導入為 STATIC_ORGS
     ALL_HK_ORGS as STATIC_ORGS 
 )
 
@@ -35,15 +37,8 @@ from .orgs import (
 # ===========================
 
 print("⏳ 正在初始化銀行數據庫 (讀取 Excel/CSV)...")
-# 1. 載入動態銀行數據
 BANK_ORGS, BANK_ADDRS = load_bank_data()
-
-# 2. 合併機構名單
-# 結合「靜態生活名單」與「金管局銀行名單」，提供給 Generator 使用
-# 使用 set 去重，再轉回 list
 ALL_HK_ORGS = list(set(STATIC_ORGS + BANK_ORGS))
-
-# 3. 導出真實地址
 ALL_REAL_ADDRESSES = BANK_ADDRS
 
 # ===========================
@@ -53,7 +48,6 @@ ALL_REAL_ADDRESSES = BANK_ADDRS
 def get_all_templates():
     """
     整合所有範本：商用足量完美版
-    🔥 關鍵修復：使用 list() 強制轉型，防止 TypeError (tuple + list)
     """
     
     # 一般與對話
@@ -68,9 +62,16 @@ def get_all_templates():
     part7 = list(get_long_entity_templates())
     part8 = list(get_org_position_separation_templates())
     
+    # 職稱邊界與 ID 混淆修復
+    part15 = list(get_job_title_boundary_templates()) 
+    part16 = list(get_id_confusion_templates())
+    
+    # 🔥 [新增] 弱點實體專項修復 (Account, Plate, Phone)
+    part17 = list(get_weak_entity_templates()) 
+    
     # 物流與機構補充
     part9 = list(get_logistics_and_ecommerce_templates())
-    part10 = list(get_supplementary_data()) # 這裡之前可能回傳了 tuple，現在強制轉 list
+    part10 = list(get_supplementary_data())
     
     # 負樣本與基建
     part11 = list(get_hard_negative_templates())
@@ -82,7 +83,8 @@ def get_all_templates():
     all_templates = (
         part1 + part2 + part3 + part4 + part5 + 
         part6 + part7 + part8 + part9 + part10 + 
-        part11 + part12 + part13 + part14
+        part11 + part12 + part13 + part14 + 
+        part15 + part16 + part17 # ✅ 加入 part17
     )
     
     return all_templates

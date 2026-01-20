@@ -15,6 +15,8 @@ from transformers import (
 )
 from peft import get_peft_model, LoraConfig, TaskType
 import evaluate
+# 🔥 [新增] 導入詳細報告工具
+from seqeval.metrics import classification_report
 
 # ===========================
 # 🔥 1. 路徑修復 (Critical Path Fix)
@@ -140,6 +142,18 @@ def train():
         ]
 
         results = metric.compute(predictions=true_predictions, references=true_labels)
+        
+        # 🔥 [關鍵新增] 生成並打印詳細分類報告
+        # 這能讓你在 Console 中直接看到每個類別 (ADDRESS, NAME...) 的分數
+        try:
+            report = classification_report(true_labels, true_predictions)
+            print("\n" + "="*40)
+            print("📊 詳細分類效能報告 (Per-Entity Report):")
+            print(report)
+            print("="*40 + "\n")
+        except Exception as e:
+            print(f"⚠️ 無法生成詳細報告: {e}")
+
         return {
             "f1": results["overall_f1"],
             "precision": results["overall_precision"],
@@ -150,10 +164,13 @@ def train():
     args = TrainingArguments(
         output_dir="./lora_out",
         eval_strategy="steps",
-        eval_steps=100,
+        
+        # 優化設置：減少評估頻率以加快訓練
+        eval_steps=500,        
         save_strategy="steps",
-        save_steps=100,
-        save_total_limit=2,  # 🔥 限制只保留最新的 2 個模型，節省硬碟空間
+        save_steps=500,        
+        
+        save_total_limit=2,    
         
         learning_rate=2e-5,
         num_train_epochs=5,
@@ -183,7 +200,8 @@ def train():
         data_collator=DataCollatorForTokenClassification(tokenizer),
         compute_metrics=compute_metrics,
         callbacks=[
-            EarlyStoppingCallback(early_stopping_patience=3),
+            # 優化設置：給予更多耐心 (Patience 10)
+            EarlyStoppingCallback(early_stopping_patience=10), 
             LogCallback(log_path="training_history.json")
         ]
     )

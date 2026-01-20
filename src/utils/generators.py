@@ -13,10 +13,17 @@ except ImportError:
 fake = Faker(['en_US', 'zh_TW'])
 
 # 基建/交通路線的地點簡稱 (用來配合 "高鐵", "線", "大橋" 等後綴)
+# 🔥 [已擴充] 包含真實與常見的雙字/三字簡稱，訓練模型將其視為單一實體
 INFRA_PREFIXES = [
     "西延", "杭衢", "屯馬", "廣深港", "京滬", "港珠澳", 
     "中九龍", "北環", "東鐵", "南港島", "將軍澳", "東涌",
-    "深中", "青馬", "汀九", "昂船洲", "大老山", "西區"
+    "深中", "青馬", "汀九", "昂船洲", "大老山", "西區",
+    # 新增
+    "瀋白", "長贛", "滬昆", "京港", "京台", "川藏", "成渝",
+    "甬台溫", "溫福", "福廈", "廈深", "廣珠", "南廣", "貴廣",
+    "蘭新", "寶蘭", "石太", "膠濟", "鄭西", "武廣", "合福",
+    "深珠", "港澳", "廣佛", "莞惠", "穗深", "江湛", "梅汕",
+    "贛深", "張吉懷", "牡佳", "朝凌", "興泉", "浦梅", "常益"
 ]
 
 def generate_phone():
@@ -57,15 +64,19 @@ def generate_hong_kong_id():
     elif rand < 0.5:
         # 字母有空格: A 123456(7) (這能訓練模型連接 _A 和 _123)
         return f"{letter} {nums}({check})"
-    elif rand < 0.7:
+    elif rand < 0.65:
         # 無括號: A1234567
         return f"{letter}{nums}{check}"
-    elif rand < 0.85:
+    elif rand < 0.8:
         # 帶橫線: A-123456(7)
         return f"{letter}-{nums}({check})"
-    else:
+    elif rand < 0.9:
         # 雜亂空格 (模擬 OCR 錯誤或手殘): A 123 456(7)
         return f"{letter} {nums[:3]} {nums[3:]}({check})"
+    else:
+        # 🔥 對抗樣本 (Adversarial Case): 模擬像電話長度的 ID (1字母 + 8數字)
+        extra_digit = str(random.randint(0, 9))
+        return f"{letter}{nums}{check}{extra_digit}"
 
 def generate_account():
     """
@@ -128,6 +139,11 @@ def generate_transliterated_name(corpus_names):
     ]
     return random.choice(formats)
 
+def generate_money():
+    """生成金額字串"""
+    amount = random.randint(100, 1000000)
+    return f"{amount:,}" # 1,234,567
+
 def get_random_fillers(names_data, addresses):
     """
     names_data: 名字庫
@@ -135,17 +151,16 @@ def get_random_fillers(names_data, addresses):
     """
     
     # 🔥 3. 地址合併策略
-    # 將 loaders.py 的隨機路名 與 銀行 CSV 的真實地址合併
     combined_addresses = (addresses or []) + ALL_REAL_ADDRESSES
     safe_addresses = combined_addresses if combined_addresses else ["香港中環"]
     
-    # 30% 機率使用 "西延"、"屯馬" 簡稱 (配合基建範本)
-    if random.random() < 0.3:
+    # 50% 機率使用基建簡稱
+    if random.random() < 0.5:
         target_addr = random.choice(INFRA_PREFIXES)
     else:
         target_addr = random.choice(safe_addresses)
     
-    # 名字策略：30% 譯名，70% 標準名
+    # 名字策略
     if random.random() < 0.3:
         trans_list = names_data.get("transliterated", [])
         if trans_list:
@@ -159,18 +174,41 @@ def get_random_fillers(names_data, addresses):
         else:
             target_name = "陳大文"
 
+    # 🔥 [關鍵修改] 強制提升稀有實體 (ACCOUNT, LICENSE_PLATE) 的生成機率
+    # 1. 車牌 (LICENSE_PLATE) - 之前是 0 分，現在要狂操
+    if random.random() < 0.6: # 提高到 60% 機率生成含空格的車牌
+        plate = f"{''.join(random.choices('ABCDEFGHIJKLMNOPQRSTUVWXYZ', k=2))} {random.randint(100, 9999)}"
+    else:
+        plate = generate_license_plate()
+
+    # 2. 銀行戶口 (ACCOUNT) - 增加變體
+    acc_raw = "".join([str(random.randint(0, 9)) for _ in range(random.randint(9, 16))])
+    if random.random() < 0.4:
+        account = f"{acc_raw[:3]}-{acc_raw[3:9]}-{acc_raw[9:]}" # 123-456789-000
+    elif random.random() < 0.7:
+        account = f"{acc_raw[:4]} {acc_raw[4:8]} {acc_raw[8:]}" # 1234 5678 9000
+    else:
+        account = acc_raw # 純數字
+
     return {
         "{name}": target_name,
         "{addr}": target_addr,
         "{phone}": generate_phone(),
         "{id_num}": generate_id(),
-        "{account}": generate_account(),
-        "{plate}": generate_license_plate(),
+        "{account}": account,       # ✅ 使用增強後的 account
+        "{plate}": plate,           # ✅ 使用增強後的 plate
         "{org}": generate_company(), 
         "{age}": str(random.randint(18, 80)),
+        "{money}": generate_money(),
         
         # 兼容性 Keys
         "{bank}": generate_company(),
         "{station}": generate_company(),
-        "{company}": generate_company()
+        "{company}": generate_company(),
+        
+        # 預設空值
+        "{code}": str(random.randint(1000, 9999)),
+        "{pickup_code}": str(random.randint(100000, 999999)),
+        "{order_id}": f"ORD-{random.randint(10000, 99999)}",
+        "{email}": fake.email()
     }
