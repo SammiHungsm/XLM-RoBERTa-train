@@ -1,7 +1,10 @@
 # src/utils/templates/negatives.py
 
 def get_hard_negative_templates():
-    """Point 2 核心：增加困難負樣本，防止誤殺 (標籤全為 O)"""
+    """
+    🔥 [Hard Negatives] 困難負樣本
+    包含泛稱、通用名詞、政府機關等，防止誤認為 PII。
+    """
     return [
         ["經理", "說明天早點上班。"],
         ["", "主席", "發表了演講。"],
@@ -14,9 +17,9 @@ def get_hard_negative_templates():
         ["呢個係 (第一項) 修正案。"],
         ["由於 (有限公司) 嘅法律定義，我哋要重新審視。"],
         ["呢個 ", "集團 ", "規模好大。"],
-        
-        # 🔥 新增：防止泛稱機構被誤殺 (針對 #17 政府誤判)
-        # 告訴模型：單獨出現的 "政府"、"警方" 通常是通用詞，非特定實體
+        ["請參考第二頁。"],
+        ["附件有詳細說明。"],
+        ["這個計劃進展順利。"],
         ["", "政府", "宣布新政策。"],
         ["", "警方", "正調查案件。"],
         ["", "當局", "表示關注。"],
@@ -25,7 +28,10 @@ def get_hard_negative_templates():
     ]
 
 def get_extreme_anti_hallucination_templates():
-    """極端抗幻覺：防止誤認日期、網址、編號 (標籤全為 O)"""
+    """
+    🔥 [Anti-Hallucination] 極端抗幻覺
+    防止誤認日期、網址、編號、價格為敏感資料。
+    """
     return [
         ["會議 ID：", "852 123 4567", " (Zoom Meeting)"], 
         ["驗證碼：", "912345", " (有效時間 5 分鐘)"],
@@ -44,21 +50,33 @@ def get_extreme_anti_hallucination_templates():
 
 def get_infrastructure_negatives():
     """
-    這裡只保留完全不含地名的通用描述，或者虛構的非地點基建。
-    ❌ 已移除 '西延高鐵', '屯馬線' 等具體名稱，避免與正樣本衝突。
+    🔥 [News/Description Style] 新聞與描述性語句
+    針對 ID 0/12 的問題：地名作為主語或描述對象時，不應標記為 ADDRESS。
+    這裡生成的 {addr} 會在 generator 中被視為 O (非 PII)。
     """
     return [
         ["呢個", "基建項目", "耗資數百億。"],
         ["政府大力推動", "大型基建", "發展。"],
         ["這條", "鐵路", "採用最新技術。"],
         ["", "高速鐵路", "網絡日益完善。"],
-        ["", "跨海大橋", "工程艱鉅。"]
+        ["", "跨海大橋", "工程艱鉅。"],
+        # 新聞語氣負樣本 (這些 {addr} 在負樣本生成模式下標籤為 O)
+        ["{addr}", "是一個美麗的城市。"],
+        ["{addr}", "的人口密度很高。"],
+        ["關於", "{addr}", "的歷史發展。"],
+        ["{addr}", "的經濟增長迅速。"],
+        ["{addr}", "鐵路全長300公里。"],  # 教模型：見到「全長」、「公里」唔好當地址
+        ["{addr}", "大橋設計壽命100年。"],
+        ["{addr}", "政府今日宣布新政策。"],
+        ["據", "{addr}", "媒體報導。"],
+        ["來自", "{addr}", "的代表團。"],
+        ["{addr}", "股市收市上升。"]
     ]
 
 def get_age_negative_templates():
     """
-    🔥 針對性負樣本：防止模型將「年齡數字」誤判為地址或 ID。
-    解決：At the age of 82 -> 82[ADDRESS] 的問題。
+    🔥 [Address Bleeding Fix] 數字干擾
+    針對 ID 2 的問題：防止模型將「年齡數字」誤判為地址或 ID。
     """
     return [
         # 中文語境
@@ -66,14 +84,33 @@ def get_age_negative_templates():
         ["張三今年已經", "{age}", "歲了。"],
         ["死者是一名", "{age}", "歲男子。"],
         ["年齡：", "{age}", "。"],
-        ["我個仔今年", "{age}", "歲大。"], # 廣東話
+        ["我個仔今年", "{age}", "歲大。"], 
         ["一位", "{age}", "歲的老伯伯在公園散步。"],
+        ["這件商品價值", "{money}", "元。"],
+        ["發生於", "{age}", "年前的往事。"],
+        ["身高180cm，體重70kg。"],
         
-        # 英文語境 (特別針對誤判的句型)
+        # 英文語境
         ["At the age of ", "{age}", "."],
         ["She is ", "{age}", " years old."],
         ["He is currently ", "{age}", "."],
-        ["A ", "{age}", "-year-old woman was found."], # 連字號也很容易誤判
+        ["A ", "{age}", "-year-old woman was found."], 
         ["Age: ", "{age}", ""],
         ["The patient is aged ", "{age}", "."]
     ]
+
+def get_all_negatives():
+    """
+    整合所有負樣本並轉換為字符串列表，供 Generator 使用。
+    """
+    all_lists = []
+    all_lists.extend(get_hard_negative_templates())
+    all_lists.extend(get_extreme_anti_hallucination_templates())
+    all_lists.extend(get_infrastructure_negatives())
+    all_lists.extend(get_age_negative_templates())
+    
+    # 將列表片段拼接成完整字串
+    return ["".join(parts) for parts in all_lists]
+
+# 導出供外部使用的常量
+COMMON_NEGATIVES = get_all_negatives()

@@ -1,8 +1,12 @@
 # src/utils/templates/general.py
 
 def get_standard_templates():
-    """涵蓋正式與日常對話的標準範本"""
-    return [
+    """
+    涵蓋正式與日常對話的標準範本
+    重點修復：地址邊界、英文 PII 漏抓、短句忽略
+    """
+    
+    raw_templates = [
         # ===========================
         # 1. 基礎生活場景 (Base)
         # ===========================
@@ -17,11 +21,11 @@ def get_standard_templates():
         ["關於 ", "{name}", " 的傳記。"],
         ["", "{name}", "主演了這部電影。"],
         ["這本書的作者是 ", "{name}", "。"],
-        ["作者 ", "{name}", " (", "{name}", ") 寫得好好。"], # 測試括號內外的人名
+        ["作者 ", "{name}", " (", "{name}", ") 寫得好好。"], 
 
         # ===========================
         # 2. 地址邊界強化 (Address Boundary Reinforcement)
-        # 🔥 針對 #4, #5 案例：教導模型地址後面會有逗號、年齡，不要吞進去
+        # 🔥 核心修復：強制「地址」緊接「標點」再緊接「數字/年齡」
         # ===========================
         ["已知 ", "{name}", " 居住於 ", "{addr}", "，", "{age}", " 歲。"], 
         ["居住於 ", "{addr}", "，", "{age}", " 歲。"],
@@ -31,10 +35,12 @@ def get_standard_templates():
         ["送貨到 ", "{addr}", "，聯絡 ", "{phone}", "。"],
         ["", "{addr}", "，", "業主", "是 ", "{name}", "。"],
         ["", "{name}", " 住係 ", "{addr}", "，佢今年 ", "{age}", " 歲。"],
+        ["公司位於", "{addr}", "，成立於", "{code}", "年。"],
+        ["送貨到", "{addr}", "，貨到付款", "{money}", "。"],
+        ["登記地址：", "{addr}", "。聯絡電話：", "{phone}", "。"],
 
         # ===========================
         # 3. 英文 PII 盲點修復 (English PII Fixes)
-        # 🔥 針對 #11 案例：解決英文語境下漏標 ID、車牌、帳號的問題
         # ===========================
         ["Receiver: ", "{name}", ", Address: ", "{addr}", ", Tel: ", "{phone}", "."],
         ["Please transfer to ", "{account}", " (Acc Name: ", "{name}", ")."],
@@ -55,44 +61,41 @@ def get_standard_templates():
         ["HKID: ", "{id_num}", " / Phone: ", "{phone}", "."],
 
         # ===========================
-        # 4. 短句與特殊格式 (Short & Special)
-        # 🔥 針對 #8 案例：極短句容易被忽略
+        # 4. 短句與破碎格式 (Short & Special)
         # ===========================
         ["身分證 ", "{id_num}", "。"],
         ["ID ", "{id_num}", "。"],
         ["我的證件號係 ", "{id_num}", "。"],
-
-        # ===========================
-        # 5. 極端破碎格式訓練 (Extreme Fragmentation)
-        # 🔥 針對 #10, #11 的 "Crainch" 問題：手把手教模型認字
-        # ===========================
-        ["ID: ", "R", "{id_num}", "(", "A", ")"], # 故意打散，雖然生成器會填入完整 ID，但這種結構有助於模型理解周圍環境
+        ["ID: ", "R", "{id_num}", "(", "A", ")"], 
         ["My ID starts with ", "R", ": ", "{id_num}", "."],
-        ["Account number is ", "123", " ", "{account}", "."], # 前面故意放數字干擾
+        ["Account number is ", "123", " ", "{account}", "."],
 
         # ===========================
-        # 6. 常見 APP 與 縮寫 (Apps & Abbreviations)
-        # 🔥 針對 #14, #15 案例：讓模型適應小寫和符號
+        # 5. 常見 APP 與 縮寫
         # ===========================
-        ["去 ", "A&E", " 睇醫生。"], # A&E (急症室)
-        ["加我 ", "line", " 傾。"],  # 小寫 line
-        ["用 ", "whatsapp", " send 比你。"] # 小寫 whatsapp
+        ["去 ", "A&E", " 睇醫生。"],
+        ["加我 ", "line", " 傾。"], 
+        ["用 ", "whatsapp", " send 比你。"]
     ]
+    
+    return ["".join(parts) for parts in raw_templates]
 
 def get_mixed_slang_templates():
     """港式口語與混合語境"""
-    return [
+    raw_templates = [
         ["唔該幫我找咗張單先，入落 ", "{account}", " (", "{name}", ") 個度。"],
         ["喂係咪 ", "{name}", "？我係 ", "{org}", " 既保安，你個車牌 ", "{plate}", " 塞住咗。"],
         ["麻煩將 ", "{id_num}", " 副本 Send 俾 ", "{name}", " 睇睇。"],
         ["個地址係 ", "{addr}", "，門口有個 ", "{phone}", " 既牌就係喇。"]
     ]
+    return ["".join(parts) for parts in raw_templates]
 
 def get_phone_variation_templates():
-    """針對 A/C 點：增加各種格式的電話範例"""
-    return [
+    """增加各種格式的電話範例"""
+    raw_templates = [
         ["Call me at ", "{phone}", " now."],
         ["WhatsApp me +852 ", "{phone}", "."],
         ["聯絡人：", "{name}", "，電話：", "{phone}", "。"],
         ["Tel: (852) ", "{phone}", " (Office)"]
     ]
+    return ["".join(parts) for parts in raw_templates]

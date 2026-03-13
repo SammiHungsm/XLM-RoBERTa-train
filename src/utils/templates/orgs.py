@@ -86,7 +86,7 @@ SUPPLEMENTARY_ORG_TEMPLATES = [
 
 def get_supplementary_data():
     """
-    🔥 修正：只回傳模板列表 (List of Lists)
-    名單 (ALL_HK_ORGS) 由 __init__.py 直接 import 變數獲取
+    🔥 修正：回傳模板列表。
+    為了兼容 generators.py 的字符串處理邏輯，這裡將 List of Lists 拼接為 List of Strings。
     """
-    return SUPPLEMENTARY_ORG_TEMPLATES
+    return ["".join(parts) for parts in SUPPLEMENTARY_ORG_TEMPLATES]
